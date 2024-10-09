@@ -37,6 +37,16 @@
         <li><button class="button" onclick="showForm('doctorForm', 'Add Doctor')">
                 <i class="fas fa-user-md"></i> Add Doctor
             </button></li>
+        <li>
+            <button class="button" onclick="showForm('nurseForm', 'Add Nurse')">
+                <i class="fas fa-user-nurse"></i> Add Nurse
+            </button>
+        </li>
+        <li>
+            <button class="button" onclick="showForm('staffForm', 'Add General Staff')">
+                <i class="fas fa-users-cog"></i> Add General Staff
+            </button>
+        </li>
         <li><button class="button" onclick="showForm('doctorBooking', 'Doctor Booking')">
                 <i class="fas fa-user-doctor"></i> Doctor Booking
             </button></li>
@@ -199,6 +209,106 @@
                 </div>
 
                 <button type="submit" class="input-submit">Add Doctor</button>
+            </form>
+        </div>
+
+        <!-- Add Nurse Form -->
+        <div id="nurseForm" class="content-section" style="display: none;">
+            <form class="form-container" method="post" action="{{ route('add-nurse') }}">
+                @csrf <!-- Adding CSRF token for security -->
+
+                <div class="input_box">
+                    <input type="text" name="name" class="input-field" id="nurseName" required>
+                    <label class="label" for="nurseName">Nurse Name</label>
+                    <i class="icon fas fa-user-nurse"></i>
+                    @error('name')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="input_box">
+                    <input type="text" name="specialty" class="input-field" id="nurseSpecialty" required>
+                    <label class="label" for="nurseSpecialty">Specialty</label>
+                    <i class="icon fas fa-stethoscope"></i>
+                    @error('specialty')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Clinic Dropdown -->
+                <div class="input_box">
+                    <select name="clinic_id" class="input-field" id="nurseClinic" required>
+                        <option value="" disabled selected>Select Clinic</option>
+                        @foreach($clinics as $clinic)
+                            <option value="{{ $clinic->id }}">{{ $clinic->name }}</option>
+                        @endforeach
+                    </select>
+                    <i class="icon fas fa-hospital"></i>
+                    @error('clinic_id')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="input_box">
+                    <input type="number" name="experience" class="input-field" id="nurseExperience" required min="0">
+                    <label class="label" for="nurseExperience">Years of Experience</label>
+                    <i class="icon fas fa-briefcase"></i>
+                    @error('experience')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <button type="submit" class="input-submit">Add Nurse</button>
+            </form>
+        </div>
+
+        <!-- Add General Staff Form -->
+        <div id="staffForm" class="content-section" style="display: none;">
+            <form class="form-container" method="post" action="{{ route('add-staff') }}">
+                @csrf <!-- Adding CSRF token for security -->
+
+                <div class="input_box">
+                    <input type="text" name="name" class="input-field" id="staffName" required>
+                    <label class="label" for="staffName">Staff Name</label>
+                    <i class="icon fas fa-user"></i>
+                    @error('name')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="input_box">
+                    <input type="text" name="role" class="input-field" id="staffRole" required>
+                    <label class="label" for="staffRole">Role</label>
+                    <i class="icon fas fa-user-tag"></i>
+                    @error('role')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Clinic Dropdown -->
+                <div class="input_box">
+                    <select name="clinic_id" class="input-field" id="staffClinic" required>
+                        <option value="" disabled selected>Select Clinic</option>
+                        @foreach($clinics as $clinic)
+                            <option value="{{ $clinic->id }}">{{ $clinic->name }}</option>
+                        @endforeach
+                    </select>
+                    <i class="icon fas fa-hospital"></i>
+                    @error('clinic_id')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="input_box">
+                    <input type="number" name="experience" class="input-field" id="staffExperience" required min="0">
+                    <label class="label" for="staffExperience">Years of Experience</label>
+                    <i class="icon fas fa-briefcase"></i>
+                    @error('experience')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <button type="submit" class="input-submit">Add General Staff</button>
             </form>
         </div>
 
