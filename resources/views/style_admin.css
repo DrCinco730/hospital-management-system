@@ -1,0 +1,375 @@
+/* General Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+:root {
+    --primary-color: #c6c3c3;
+    --secondary-color: #ffffff;
+    --black-color: #000000;
+    --sidebar-bg-color: #2d3436;
+    --sidebar-hover-color: #6c757d;
+    --sidebar-active-color: #495057;
+    --table-header-bg: #495057;
+    --table-row-bg: #ffffff;
+    --table-row-hover-bg: #f1f1f1;
+    --table-text-color: #000000;
+}
+
+/* Body Styling */
+body {
+    background-image: url("backgrond.webp");
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    display: flex;
+    direction: ltr;
+    /* Left-to-Right Direction */
+}
+
+/* Sidebar Styling */
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background: linear-gradient(135deg, var(--sidebar-bg-color), var(--sidebar-active-color));
+    color: var(--secondary-color);
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+    transition: width 0.3s;
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background-color: var(--sidebar-active-color);
+    border-radius: 3px;
+}
+
+/* User Profile in Sidebar */
+.user-profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.user-icon {
+    font-size: 70px;
+    color: var(--secondary-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
+
+.user-info {
+    margin-top: 10px;
+}
+
+.user-name {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.user-email {
+    font-size: 14px;
+    color: #adb5bd;
+}
+
+/* Divider */
+.divider {
+    width: 80%;
+    border: 1px solid var(--sidebar-active-color);
+    margin: 10px 0;
+}
+
+/* Sidebar Header */
+.sidebar-header {
+    margin-bottom: 30px;
+}
+
+.sidebar-header h3 {
+    color: var(--secondary-color);
+    font-size: 22px;
+    text-align: center;
+}
+
+/* Sidebar Menu */
+.sidebar-menu {
+    list-style-type: none;
+    padding: 0;
+    width: 100%;
+}
+
+.sidebar-menu li {
+    width: 100%;
+}
+
+.sidebar-menu li .button {
+    width: 100%;
+    padding: 15px 20px;
+    text-align: left;
+    /* Align text to the left */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    background-color: transparent;
+    color: var(--secondary-color);
+    border: none;
+    cursor: pointer;
+    font-size: 17px;
+    transition: background-color 0.3s, padding-left 0.3s;
+    position: relative;
+}
+
+.sidebar-menu li .button i {
+    margin-right: 15px;
+    /* Space between icon and text */
+    font-size: 20px;
+    min-width: 25px;
+    text-align: center;
+}
+
+.sidebar-menu li .button::before {
+    content: '';
+    position: absolute;
+    height: 100%;
+    width: 5px;
+    background-color: transparent;
+    top: 0;
+    left: 0;
+    transition: background-color 0.3s;
+}
+
+.sidebar-menu li .button:hover {
+    background-color: var(--sidebar-hover-color);
+    padding-left: 30px;
+}
+
+.sidebar-menu li .button:hover::before {
+    background-color: var(--secondary-color);
+}
+
+/* Highlight Active Menu Item */
+.sidebar-menu li.active .button {
+    background-color: var(--sidebar-active-color);
+    padding-left: 30px;
+}
+
+.sidebar-menu li.active .button::before {
+    background-color: var(--secondary-color);
+}
+
+/* Main Content Wrapper */
+.wrapper {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: rgba(0, 0, 0, 0.2);
+    margin-left: 250px;
+    transition: margin-left 0.3s;
+}
+
+/* Main Box Styling */
+.main_box {
+    width: calc(100% - 300px);
+    max-width: 800px;
+    position: relative;
+    backdrop-filter: blur(25px);
+    border: 2px solid var(--primary-color);
+    border-radius: 15px;
+    padding: 7.5em 2.5em 4em 2.5em;
+    color: var(--secondary-color);
+    box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    margin-top: 50px;
+}
+
+/* Main Header */
+.main-header {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary-color);
+    width: 350px;
+    height: 70px;
+    border-radius: 0 0 20px 20px;
+}
+
+.main-header span {
+    font-size: 30px;
+    color: var(--black-color);
+}
+
+/* Welcome Text */
+.welcome-text {
+    margin: 20px 0;
+    font-size: 18px;
+    color: var(--secondary-color);
+}
+
+/* Buttons */
+.button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font: inherit;
+    outline: inherit;
+}
+
+/* Return to Home Button */
+
+
+/* Content Sections */
+.content-section {
+    display: none;
+}
+
+/* Forms */
+.form-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+.input_box {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-field {
+    width: 100%;
+    height: 50px;
+    font-size: 14px;
+    background: transparent;
+    color: var(--secondary-color);
+    padding: 0 20px;
+    border: 2px solid var(--primary-color);
+    border-radius: 30px;
+    outline: none;
+}
+
+.label {
+    position: absolute;
+    top: 15px;
+    left: 20px;
+    transition: 0.2s;
+    background-color: transparent;
+    color: var(--secondary-color);
+}
+
+.input-field:focus~.label,
+.input-field:valid~.label {
+    top: -10px;
+    left: 20px;
+    font-size: 12px;
+    background-color: var(--primary-color);
+    border-radius: 30px;
+    color: var(--black-color);
+    padding: 0 10px;
+    display: inline-block;
+}
+
+.icon {
+    position: absolute;
+    top: 18px;
+    right: 25px;
+    font-size: 18px;
+}
+
+.input-submit {
+    width: 100%;
+    height: 45px;
+    background: #ececec;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.input-submit:hover {
+    background: var(--secondary-color);
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table thead {
+    background-color: var(--table-header-bg);
+    color: var(--secondary-color);
+}
+
+table th,
+table td {
+    padding: 12px 15px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+table tbody tr {
+    background-color: var(--table-row-bg);
+    color: var(--table-text-color);
+    transition: background-color 0.3s;
+}
+
+table tbody tr:hover {
+    background-color: var(--table-row-hover-bg);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .main_box {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+
+    .sidebar-menu {
+        flex-direction: row;
+        overflow-x: auto;
+    }
+
+    .sidebar-menu li {
+        flex: 1 0 auto;
+    }
+
+    .wrapper {
+        margin-left: 0;
+    }
+}
+
+select.input-field option {
+    color: #000000;
+    /* Set text color to black */
+}
