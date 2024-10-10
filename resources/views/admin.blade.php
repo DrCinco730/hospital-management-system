@@ -160,8 +160,28 @@
                 });
             </script>
         @endif
-
-
+        @if(session('error'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Display error message using Notiflix Report without background color
+                    Notiflix.Report.failure(
+                        'Error!',
+                        '{{ session('error') }}',
+                        'OK',
+                        {
+                            messageMaxLength: 400,
+                            plainText: true,
+                            cssAnimationStyle: 'zoom',
+                            backOverlay: false,
+                            failure: {
+                                backgroundColor: 'transparent',
+                                textColor: '#333',
+                            }
+                        }
+                    );
+                });
+            </script>
+        @endif
 
         <!-- Add Doctor Form -->
         <div id="doctorForm" class="content-section" style="display: none;">

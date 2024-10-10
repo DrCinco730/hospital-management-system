@@ -21,7 +21,7 @@ class AppointmentController extends Controller
         $this->updateData();
 
         $user = Auth::user();
-        $appointmentDetails = Appointment::withoutTrashed()
+        $appointmentDetails = Appointment::withoutTrashed()->whereNot('status', 'cancelled')
             ->where('patient_id', $user->id)
             ->with('timeSlot') // Eager load the TimeSlot relationship
             ->get()
@@ -60,7 +60,7 @@ class AppointmentController extends Controller
         $timeSlotDuration = $population < 25000 ? 15 : 10;
 
         $today = Carbon::today();
-        $appointments = Appointment::where('district_id', $districtId)
+        $appointments = Appointment::where('district_id', $districtId)->whereNot('status', 'cancelled')
             ->where('city_id', $cityId)
             ->where('appointment_date', '>=', $today)
             ->get(['appointment_date', 'time_id']);
@@ -143,7 +143,7 @@ class AppointmentController extends Controller
         return redirect()->route('success')->with('success', 'Your appointment has been successfully booked!');
     }
 
-    public function storePatientSymptoms(Request $request): RedirectResponse
+    public function storePatientSymptoms(Request $request)
     {
         $validatedData = $request->validate([
             'symptoms_list' => 'required|json',
@@ -206,13 +206,12 @@ class AppointmentController extends Controller
         }
     }
 
-    public function cancelAppointment(): RedirectResponse
+    public function cancelAppointment()
     {
         $user = Auth::user();
 
-        $appointment = Appointment::where('patient_id', $user->id)
-            ->whereNull('deleted_at')
-            ->first();
+        $appointment = Appointment::where('patient_id', $user->id)->whereNot('status', 'cancelled')
+            ->whereNull('deleted_at')->get()->first();
 
         if ($appointment) {
             $appointment->update(['status' => 'Cancelled', 'deleted_at' => now()]);

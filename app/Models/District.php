@@ -15,6 +15,7 @@ class District extends Model
      *
      * @var array
      */
+    protected $table = 'districts';
     protected $fillable = ['name', 'city_id', 'population'];
 
     /**

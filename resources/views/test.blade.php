@@ -20,7 +20,7 @@
             <span>Account Created</span>
         </div>
         <!-- Icon Section using Google Material Icons -->
-        <span class="material-icons icon">check_circle</span>
+{{--        <span class="material-icons icon">check_circle</span>--}}
         <!-- Message Section -->
         <p class="message">Your booking has been created successfully!</p>
         <!-- Button -->

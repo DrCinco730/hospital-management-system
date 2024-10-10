@@ -53,6 +53,8 @@ Route::group(['middleware' => ['auth:admin']], function () {
     Route::post('/add-clinic', [AdminController::class, 'addClinic'])->name('add-clinic');
     Route::post('/add-doctor', [AdminController::class, 'addDoctor'])->name('add-doctor');
     Route::post('/add-admin', [AdminController::class, 'addAdmin'])->name('add-admin');
+    Route::post("/add-nurse", [AdminController::class, 'addNurse'])->name('add-nurse');
+    Route::post("add-staff", [AdminController::class, 'addGeneralStaff'])->name('add-staff');
 });
 
 

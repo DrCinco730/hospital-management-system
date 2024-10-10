@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Clinic extends Model
 {
+    protected $table = 'clinics';
+
+
 
     protected $fillable = [
         'name',
@@ -17,6 +20,7 @@ class Clinic extends Model
     ];
 
     // Relationship with Doctor
+
     public function doctors(): HasMany
     {
         return $this->hasMany(Doctor::class);
@@ -32,5 +36,15 @@ class Clinic extends Model
     public function district(): BelongsTo
     {
         return $this->belongsTo(District::class);
+    }
+
+    public function nurses(): HasMany
+    {
+        return $this->hasMany(Nurse::class);
+    }
+
+    public function general_staff(): HasMany
+    {
+        return $this->hasMany(GeneralStaff::class);
     }
 }

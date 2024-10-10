@@ -6,6 +6,9 @@ use App\Models\Admin;
 use App\Models\City;
 use App\Models\Clinic;
 use App\Models\Doctor;
+use App\Models\District;
+use App\Models\GeneralStaff;
+use App\Models\Nurse;
 use App\Models\User;
 use App\Models\UserAdmin;
 use Exception;
@@ -80,9 +83,23 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
+        $districtId = Clinic::all()->where('id', $request->clinic_id)->first()->district_id;
 
-        // Create new doctor using validated data
-        Doctor::create($request->only(['name', 'specialty', 'clinic_id']) + ['experience_years' => $request->experience]);
+
+        $population = District::all()->where('id',$districtId)->first()->population;
+
+        if($population > 10000){
+            Doctor::create($request->only(['name', 'specialty', 'clinic_id']) + ['experience_years' => $request->experience]);
+        } else {
+            $clinicIds = Doctor::all()->where('clinic_id', $request->clinic_id);
+            if (count($clinicIds) >= 3) {
+                return redirect()->back()->with('error', 'You cannot add more than 3 Doctors.');
+            } else {
+                Doctor::create($request->only(['name', 'specialty', 'clinic_id']) + ['experience_years' => $request->experience]);
+            }
+        }
+
+
 
         // Redirect back with success message
         return redirect()->back()->with('success', 'Doctor has been successfully added!');
@@ -132,6 +149,101 @@ class AdminController extends Controller
 
             // Redirect back with success message
             return redirect()->back()->with('success', 'Admin created successfully!');
+        } catch (Exception $e) {
+            // Catch unexpected errors and return generic error message
+            return redirect()->back()->with('error', 'An unexpected error occurred. Please try again later.');
+        }
+    }
+
+    public function addNurse(Request $request)
+    {
+        try {
+            // Custom validation rules and messages
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'specialty' => 'required|string|max:255',
+                'clinic_id' => 'required|integer|exists:clinics,id',
+                'experience' => 'required|integer|min:0',
+            ], [
+                'name.required' => 'Please enter a name.',
+                'name.max' => 'The name must not exceed 255 characters.',
+                'specialty.required' => 'Please enter a specialty.',
+                'specialty.max' => 'The specialty must not exceed 255 characters.',
+                'clinic_id.required' => 'Please select a clinic ',
+                'experience.required' => 'Please enter a password.',
+                'experience.min' => 'The experience must be at least 0 year',
+            ]);
+
+            // If validation fails, redirect back with errors
+            if ($validator->fails()) {
+                return redirect()->back()->withErrors($validator)->withInput()->with('showForm', 'nurseForm');
+            }
+
+            $districtId = Clinic::all()->where('id', $request->clinic_id)->first()->district_id;
+
+
+            $population = District::all()->where('id',$districtId)->first()->population;
+
+            if($population > 10000){
+                Nurse::create($request->only(['name', 'specialty', 'clinic_id', 'experience']));
+            } else {
+                $clinicIds = Nurse::all()->where('clinic_id', $request->clinic_id);
+                if (count($clinicIds) >= 5) {
+                    return redirect()->back()->with('error', 'You cannot add more than 5 Nurses.');
+                } else {
+                    Nurse::create($request->only(['name', 'specialty', 'clinic_id', 'experience']));
+                }
+            }
+
+
+            // Redirect back with success message
+            return redirect()->back()->with('success', 'Nurse created successfully!');
+        } catch (Exception $e) {
+            // Catch unexpected errors and return generic error message
+            return redirect()->back()->with('error', 'An unexpected error occurred. Please try again later.');
+        }
+    }
+
+    public function addGeneralStaff(Request $request)
+    {
+        try {
+            // Custom validation rules and messages
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'role' => 'required|string|max:255',
+                'clinic_id' => 'required|integer|exists:clinics,id',
+                'experience' => 'required|integer|min:0',
+            ], [
+                'name.required' => 'Please enter a name.',
+                'name.max' => 'The name must not exceed 255 characters.',
+                'role.required' => 'Please enter a role.',
+                'role.max' => 'The role must not exceed 255 characters.',
+                'clinic_id.required' => 'Please select a clinic ',
+                'experience.required' => 'Please enter a experience.',
+                'experience.min' => 'The experience must be at least 0 year',
+            ]);
+
+            // If validation fails, redirect back with errors
+            if ($validator->fails()) {
+                return redirect()->back()->withErrors($validator)->withInput()->with('showForm', 'staffForm');
+            }
+            $districtId = Clinic::all()->where('id', $request->clinic_id)->first()->district_id;
+
+
+            $population = District::all()->where('id',$districtId)->first()->population;
+
+            if($population > 10000){
+                GeneralStaff::create($request->only(['name', 'role', 'clinic_id', 'experience']));
+            } else {
+                $clinicIds = GeneralStaff::all()->where('clinic_id', $request->clinic_id);
+                if (count($clinicIds) >= 3) {
+                    return redirect()->back()->with('error', 'You cannot add more than 3 General Staff.');
+                } else {
+                    GeneralStaff::create($request->only(['name', 'role', 'clinic_id', 'experience']));
+                }
+            }
+
+            return redirect()->back()->with('success', 'General Staff created successfully!');
         } catch (Exception $e) {
             // Catch unexpected errors and return generic error message
             return redirect()->back()->with('error', 'An unexpected error occurred. Please try again later.');
