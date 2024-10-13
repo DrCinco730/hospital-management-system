@@ -29,8 +29,10 @@ class AdminController extends Controller
         // Fetch users along with related city and district
         $users = User::with('city', 'district')->get();
 
+        $doctors = Doctor::with('clinic')->get();
+
         // Return view with cities, clinics, and users data
-        return view('admin', compact('cities', 'clinics', 'users'))
+        return view('admin', compact('cities', 'clinics', 'users','doctors'))
             ->with('success', 'You have successfully logged in.');
     }
 

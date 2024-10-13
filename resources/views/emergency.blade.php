@@ -8,6 +8,8 @@
     <!-- Google Fonts -->
     <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Poppins&display=swap'>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/notiflix@3/dist/notiflix-aio-3.2.5.min.js"></script>
+
     <link rel="stylesheet" href="{{ asset('css/style_rug-booking.css') }}"> <!-- External CSS -->
 
     <style>
@@ -22,6 +24,7 @@
     </style>
 </head>
 <body>
+    <x-popup-message/>
     <x-user-dropdown-menu/>
 
 

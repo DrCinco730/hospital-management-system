@@ -18,6 +18,7 @@ public function up()
         $table->timestamp('expires_at');
         $table->json('data')->nullable();
         $table->timestamps();
+        $table->softDeletes();
     });
 }
 

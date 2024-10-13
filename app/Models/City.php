@@ -17,6 +17,8 @@ class City extends Model
      */
     protected $fillable = ['name'];
 
+    protected $hidden = ['created_at', 'updated_at'];
+
     /**
      * Get the districts associated with the city.
      * A city can have many districts (One-to-Many relationship).

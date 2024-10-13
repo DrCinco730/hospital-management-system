@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('specialty');
             $table->foreignId('clinic_id')->constrained('clinics')->onDelete('cascade');
             $table->integer('experience_years');
-            $table->timestamps();
+            $table->softDeletes(); // Adds deleted_at column for soft deletes
         });
     }
 

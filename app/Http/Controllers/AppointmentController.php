@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Appointment;
+use App\Models\Clinic;
 use App\Models\District;
+use App\Models\Doctor;
+use App\Models\DoctorSlot;
 use App\Models\PatientSymptom;
 use App\Models\Symptom;
 use App\Models\TimeSlot;
@@ -16,14 +19,21 @@ use Illuminate\View\View;
 
 class AppointmentController extends Controller
 {
+    /**
+     * Display the booking form or appointment details.
+     */
     public function showBookingForm(): View
     {
         $this->updateData();
 
+        $doctorId = session()->get('doctor_id');
         $user = Auth::user();
-        $appointmentDetails = Appointment::withoutTrashed()->whereNot('status', 'cancelled')
+
+        $appointmentDetails = Appointment::withoutTrashed()
+            ->where('status', 'Pending')
             ->where('patient_id', $user->id)
-            ->with('timeSlot') // Eager load the TimeSlot relationship
+            ->where('doctor_id', $doctorId)
+            ->with('timeSlot')
             ->get()
             ->map(function ($appointment) {
                 return [
@@ -32,11 +42,8 @@ class AppointmentController extends Controller
                 ];
             })->first();
 
-        // Check if an appointment was found
         if ($appointmentDetails) {
             $symptoms = PatientSymptom::where('user_id', $user->id)->pluck('symptoms');
-
-            // Decode the JSON encoded symptoms if necessary
             $appointmentDetails['symptoms'] = $symptoms->isNotEmpty() ? json_decode($symptoms[0], true) : [];
 
             return view('AppointmentDetails', compact('appointmentDetails'));
@@ -48,32 +55,43 @@ class AppointmentController extends Controller
     }
 
     /**
-     * Show available time slots for appointment booking.
+     * Show available time slots for booking.
      */
-    public function showTimeChoose(): View
+    public function showTimeChoose(Request $request)
     {
         $user = Auth::user();
-        $cityId = $user->city_id;
+        $doctorId = $request->session()->get('doctor_id');
         $districtId = $user->district_id;
 
+        // Calculate time slot duration based on district population
         $population = District::where('id', $districtId)->value('population');
         $timeSlotDuration = $population < 25000 ? 15 : 10;
 
+        // Get today's date and one month ahead
         $today = Carbon::today();
-        $appointments = Appointment::where('district_id', $districtId)->whereNot('status', 'cancelled')
-            ->where('city_id', $cityId)
-            ->where('appointment_date', '>=', $today)
+        $endDate = $today->copy()->addMonth();
+
+        $appointments = Appointment::withoutTrashed()
+            ->where('doctor_id', $doctorId)
+            ->whereNot('status', 'Cancelled')
+            ->whereNot('status', 'Done')
+            ->whereBetween('appointment_date', [$today, $endDate])
             ->get(['appointment_date', 'time_id']);
 
         $bookedAppointmentsByDate = $appointments->groupBy('appointment_date');
 
+        // Define time frames for severity levels
         $severityTimeFrames = [
             3 => ['start' => '8:00:00', 'end' => '12:00:00'],
             2 => ['start' => '12:00:00', 'end' => '15:00:00'],
             1 => ['start' => '15:00:00', 'end' => '17:00:00'],
         ];
 
-        $level = PatientSymptom::withoutTrashed()->where('user_id', $user->id)->value('level');
+        $level = PatientSymptom::withoutTrashed()
+            ->where('user_id', $user->id)
+            ->pluck('level')
+            ->last();
+
         $startTime = $severityTimeFrames[$level]['start'];
         $endTime = $severityTimeFrames[$level]['end'];
 
@@ -82,13 +100,30 @@ class AppointmentController extends Controller
             ->where('end_time', '<=', $endTime)
             ->get(['id', 'start_time', 'duration']);
 
+        $doctorAvailability = DoctorSlot::where('doctor_id', $doctorId)
+            ->get(['day', 'start_time', 'end_time'])
+            ->keyBy('day');
+
         $availableSlotsByDate = [];
 
-        foreach ($bookedAppointmentsByDate as $date => $appointments) {
-            $bookedTimeIds = $appointments->pluck('time_id')->toArray();
+        foreach ($today->daysUntil($endDate) as $date) {
+            $dayOfWeek = $date->format('l');
 
-            $availableSlots = $timeSlots->filter(function ($slot) use ($bookedTimeIds) {
-                return !in_array($slot->id, $bookedTimeIds);
+            // Check doctor availability
+            if (!$doctorAvailability->has($dayOfWeek)) {
+                continue;
+            }
+
+            $doctorStartTime = $doctorAvailability[$dayOfWeek]['start_time'];
+            $doctorEndTime = $doctorAvailability[$dayOfWeek]['end_time'];
+            $appointmentsForDate = $bookedAppointmentsByDate[$date->toDateString()] ?? collect();
+            $bookedTimeIds = $appointmentsForDate->pluck('time_id')->toArray();
+
+            // Filter slots based on bookings and doctor availability
+            $availableSlots = $timeSlots->filter(function ($slot) use ($bookedTimeIds, $doctorStartTime, $doctorEndTime) {
+                return !in_array($slot->id, $bookedTimeIds) &&
+                    $slot->start_time >= $doctorStartTime &&
+                    $slot->start_time <= $doctorEndTime;
             })->map(function ($slot) {
                 return [
                     'id' => $slot->id,
@@ -96,18 +131,15 @@ class AppointmentController extends Controller
                 ];
             });
 
-            $dayName = Carbon::parse($date)->format('l');
-
-            $availableSlotsByDate[Carbon::parse($date)->toDateString()] = [
-                'day' => $dayName,
-                'slots' => $availableSlots->values(),
+            $availableSlotsByDate[$date->toDateString()] = [
+                'day' => $dayOfWeek,
+                'slots' => $availableSlots->values()->toArray(),
             ];
         }
 
-        // Sort the array by keys (dates)
         ksort($availableSlotsByDate);
 
-        return view('times', compact('availableSlotsByDate'));
+        return view('times', ['availableTimes' => $availableSlotsByDate]);
     }
 
     /**
@@ -126,23 +158,24 @@ class AppointmentController extends Controller
         ]);
 
         $user = Auth::user();
-        $cityId = $user->city_id;
-        $districtId = $user->district_id;
-
         $timeSlot = TimeSlot::findOrFail($validatedData['time_slot']);
         $appointmentDate = Carbon::parse($validatedData['appointment_date']);
+        $doctorId = $request->session()->get('doctor_id');
 
         Appointment::create([
+            'doctor_id' => $doctorId,
             'patient_id' => $user->id,
-            'city_id' => $cityId,
-            'district_id' => $districtId,
             'appointment_date' => $appointmentDate,
             'time_id' => $timeSlot->id,
+            'status' => 'Pending',
         ]);
 
         return redirect()->route('success')->with('success', 'Your appointment has been successfully booked!');
     }
 
+    /**
+     * Store patient symptoms.
+     */
     public function storePatientSymptoms(Request $request)
     {
         $validatedData = $request->validate([
@@ -172,26 +205,23 @@ class AppointmentController extends Controller
             'level' => $level,
         ]);
 
-        return $this->showTimeChoose();
+        return $this->showTimeChoose($request);
     }
 
+    /**
+     * Update appointment data.
+     */
     public function updateData(): void
     {
         $now = Carbon::now();
         $todayDate = $now->toDateString();
         $currentTime = $now->toTimeString();
 
-        // Fetch all appointments that are past their date
-        $expiredAppointments = Appointment::where('appointment_date', '<', $todayDate)
+        Appointment::where('appointment_date', '<', $todayDate)
             ->whereNull('deleted_at')
             ->where('status', '!=', 'done')
-            ->get();
+            ->update(['status' => 'done', 'deleted_at' => Carbon::now()]);
 
-        foreach ($expiredAppointments as $appointment) {
-            $appointment->update([ 'status' => 'done', 'deleted_at' => Carbon::now() ]);
-        }
-
-        // Fetch today's appointments to check for expiration
         $todaysAppointments = Appointment::where('appointment_date', '=', $todayDate)
             ->whereNull('deleted_at')
             ->where('status', '!=', 'done')
@@ -201,25 +231,67 @@ class AppointmentController extends Controller
             $timeSlot = TimeSlot::find($appointment->time_id);
 
             if ($timeSlot && $timeSlot->end_time <= $currentTime) {
-                $appointment->update([ 'status' => 'done', 'deleted_at' => Carbon::now() ]);
+                $appointment->update(['status' => 'done', 'deleted_at' => Carbon::now()]);
             }
         }
     }
 
+    /**
+     * Cancel an appointment.
+     */
     public function cancelAppointment()
     {
         $user = Auth::user();
+        $doctorId = session()->get('doctor_id');
 
-        $appointment = Appointment::where('patient_id', $user->id)->whereNot('status', 'cancelled')
-            ->whereNull('deleted_at')->get()->first();
+
+        $appointment = Appointment::where('patient_id', $user->id)
+            ->where('doctor_id', $doctorId)
+            ->whereNot('status', 'cancelled')
+            ->whereNot('status', 'Done')
+            ->whereNull('deleted_at')
+            ->update(['status' => 'Cancelled', 'deleted_at' => now()]);
 
         if ($appointment) {
-            $appointment->update(['status' => 'Cancelled', 'deleted_at' => now()]);
             PatientSymptom::where('user_id', $user->id)->delete();
 
-            return redirect()->back()->with(['success' => true, 'message' => 'Appointment cancelled successfully.']);
+            return redirect()->intended('home')->with(['success' => true, 'message' => 'Appointment cancelled successfully.']);
         }
 
         return redirect()->back()->with(['error' => false, 'message' => 'No active appointment found.']);
+    }
+
+    /**
+     * Show clinics.
+     */
+    public function showClinic()
+    {
+        $clinics = Clinic::with('city', 'district')->get()->makeHidden(['created_at', 'updated_at']);
+
+        return view("clinic-selection", ['clinics' => $clinics]);
+    }
+
+    /**
+     * Show doctors in a clinic.
+     */
+    public function showDoctor($clinicId)
+    {
+        $doctors = Doctor::withoutTrashed()
+            ->where('clinic_id', $clinicId)
+            ->get()
+            ->makeHidden(['created_at', 'updated_at', 'deleted_at']);
+
+        return view("select-doctor", ['doctors' => $doctors]);
+    }
+
+    /**
+     * Save selected doctor to session.
+     */
+    public function saveDoctor(Request $request)
+    {
+        $doctorId = $request->query('doctor_id');
+        session(['doctor_id' => $doctorId]);
+
+        return redirect("/book-appointment");
     }
 }

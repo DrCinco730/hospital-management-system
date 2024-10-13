@@ -13,7 +13,6 @@ class CreateDistrictsTable extends Migration
             $table->string('name');
             $table->foreignId('city_id')->constrained('cities')->onDelete('cascade');
             $table->integer('population')->nullable(); // إضافة حقل لعدد السكان
-            $table->timestamps();
         });
     }
 

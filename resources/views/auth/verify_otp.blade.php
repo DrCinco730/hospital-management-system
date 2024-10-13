@@ -9,6 +9,8 @@
     <!-- Fonts and Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/boxicons@2.0.9/css/boxicons.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/notiflix@3/dist/notiflix-aio-3.2.5.min.js"></script>
+
 
     <!-- CSS Styles -->
     <link rel="stylesheet" href="{{ asset('css/style_otp.css') }}">
@@ -67,6 +69,8 @@
     </style>
 </head>
 <body>
+<x-popup-message/>
+
 <div class="wrapper">
     <div class="login_box">
         <div class="login-header">

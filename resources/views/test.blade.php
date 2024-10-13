@@ -7,12 +7,14 @@
     <title>Account Created</title>
     <!-- Link to Google Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
     <!-- Link to external CSS file -->
     <link rel="stylesheet" href="{{ asset('css/style_created.css') }}">
 </head>
 
 <body>
 <x-user-dropdown-menu/>
+
 
 <div class="wrapper">
     <div class="login_box">

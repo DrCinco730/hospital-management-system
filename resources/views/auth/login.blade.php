@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link href='https://fonts.googleapis.com/css2?family=Poppins&display=swap' rel='stylesheet'>
+    <script src="https://cdn.jsdelivr.net/npm/notiflix@3/dist/notiflix-aio-3.2.5.min.js"></script>
+
     <link rel="stylesheet" href="{{ asset('css/style.css') }}"> <!-- External stylesheet -->
 </head>
 <body>
@@ -79,11 +81,34 @@
             </form>
         </div>
     </div>
+    @if(session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Display error message using Notiflix Report without background color
+                Notiflix.Report.failure(
+                    'Error!',
+                    '{{ session('error') }}',
+                    'OK',
+                    {
+                        messageMaxLength: 400,
+                        plainText: true,
+                        cssAnimationStyle: 'zoom',
+                        backOverlay: false,
+                        failure: {
+                            backgroundColor: 'transparent',
+                            textColor: '#333',
+                        }
+                    }
+                );
+            });
+        </script>
+    @endif
+
 
     <style>
         /* Background styling */
         body {
-            background-image: url("{{ asset('images/backgrond.webp') }}");    
+            background-image: url("{{ asset('images/backgrond.webp') }}");
             background-position: center;
             background-size: cover;
             background-repeat: no-repeat;

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Calendar</title>
+    <!-- Link to Flatpickr Library -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- Link to External CSS File -->
+    <link rel="stylesheet" href="style_time22.css">
+    <!-- Include Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="calendar_box">
+            <div class="calendar-header">
+                <h2>Select a Date</h2>
+            </div>
+            <div class="explanatory-text">
+                Choose a date to see available times below.
+            </div>
+            <!-- Flatpickr Calendar -->
+            <div id="calendar" class="flatpickr-inline"></div>
+            <!-- Display Available Times -->
+            <div id="times-container">
+                <p id="instruction" class="message">Select a date to view available times.</p>
+                <div id="times-list"></div>
+            </div>
+            <div class="book-btn">
+                <button id="book-now" disabled><span>🕒</span> Book Now</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Available Times Data
+        const mockAvailableTimes = {
+            "2024-10-20": ["08:00 AM", "09:00 AM", "10:00 AM", "10:00 AM", "10:00 AM", "10:00 AM", "10:00 AM"],
+            "2024-10-21": ["09:30 AM", "11:00 AM", "02:00 PM"],
+            "2024-10-22": ["10:00 AM", "01:00 PM", "03:00 PM"]
+        };
+
+        let selectedDate = null;
+        let selectedTime = null;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            flatpickr("#calendar", {
+                altInput: true,
+                altFormat: "F j, Y",
+                dateFormat: "Y-m-d",
+                enableTime: false,
+                defaultDate: "today",
+                inline: true,
+                onChange: function (selectedDates, dateStr) {
+                    selectedDate = dateStr;
+                    displayAvailableTimes(dateStr);
+                },
+                onDayCreate: function (dObj, dStr, fp, dayElem) {
+                    const dateObj = dayElem.dateObj;
+                    const year = dateObj.getFullYear();
+                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const day = String(dateObj.getDate()).padStart(2, '0');
+                    const dateStr = `${year}-${month}-${day}`;
+
+                    // Disable dates not in mockAvailableTimes
+                    if (!(dateStr in mockAvailableTimes)) {
+                        dayElem.classList.add("disabled");
+                    }
+                }
+            });
+
+            // Handle Booking Button Click
+            document.getElementById('book-now').addEventListener('click', function () {
+                if (selectedDate && selectedTime) {
+                    // Here you can send the data to the server or process it as needed
+                    // For demonstration, we'll display it in an alert
+                    alert(`You have booked an appointment on ${selectedDate} at ${selectedTime}.`);
+                }
+            });
+        });
+
+        function displayAvailableTimes(date) {
+            const timesList = document.getElementById('times-list');
+            const instruction = document.getElementById('instruction');
+            timesList.innerHTML = '';
+            selectedTime = null;
+            document.getElementById('book-now').disabled = true;
+
+            if (mockAvailableTimes[date] && mockAvailableTimes[date].length > 0) {
+                // Display Instructional Message
+                instruction.textContent = 'Please select a specific time from the available slots below:';
+
+                mockAvailableTimes[date].forEach(time => {
+                    const timeElement = document.createElement('div');
+                    timeElement.className = 'time-slot';
+                    timeElement.innerText = time;
+
+                    // Add click event listener to each time slot
+                    timeElement.addEventListener('click', function () {
+                        // Remove selection from all time slots
+                        const allTimeSlots = document.querySelectorAll('.time-slot');
+                        allTimeSlots.forEach(slot => slot.classList.remove('selected'));
+
+                        // Highlight the selected time slot
+                        timeElement.classList.add('selected');
+                        selectedTime = time;
+                        document.getElementById('book-now').disabled = false;
+                    });
+
+                    timesList.appendChild(timeElement);
+                });
+            } else {
+                // Display No Available Times Message
+                instruction.textContent = 'No available times for this day.';
+            }
+        }
+    </script>
+</body>
+
+</html>

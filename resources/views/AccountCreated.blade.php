@@ -7,11 +7,15 @@
     <title>Account Created</title>
     <!-- Link to Google Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/notiflix@3/dist/notiflix-aio-3.2.5.min.js"></script>
+
     <!-- Link to external CSS file -->
     <link rel="stylesheet" href="{{ asset('css/style_created.css') }}">
 </head>
 
 <body>
+<x-popup-message/>
+
     <div class="wrapper">
         <div class="login_box">
             <div class="login-header">

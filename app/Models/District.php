@@ -18,6 +18,8 @@ class District extends Model
     protected $table = 'districts';
     protected $fillable = ['name', 'city_id', 'population'];
 
+    protected $hidden = ['created_at', 'updated_at'];
+
     /**
      * Get the city that the district belongs to.
      * A district belongs to a single city (Many-to-One relationship).

@@ -59,12 +59,19 @@
         <li><button class="button" onclick="showForm('viewUsers', 'View Users')">
                 <i class="fas fa-users"></i> View Users
             </button></li>
+        <li>
+            <button class="button" onclick="showForm('viewDoctors', 'View Doctors')">
+                <i class="fas fa-user-md"></i> View Doctors
+            </button>
+        </li>
         <li><button id="addAdminButton" class="button" onclick="showForm('addAdminForm', 'Add Admin')">
                 <i class="fas fa-user-shield"></i> Add Admin
             </button></li>
         <li><button class="button" onclick="Logout()">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </button></li>
+
+
     </ul>
 </div>
 
@@ -330,6 +337,34 @@
 
                 <button type="submit" class="input-submit">Add General Staff</button>
             </form>
+        </div>
+
+        <!-- View Doctors Section -->
+        <div id="viewDoctors" class="content-section" style="display: none;">
+            <table>
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Doctor Name</th>
+                    <th>Specialty</th>
+                    <th>Clinic</th>
+                    <th>Experience</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach ($doctors as $index => $doctor)
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $doctor->name }}</td>
+                        <td>{{ $doctor->specialty }}</td>
+                        <td>{{ $doctor->clinic->name }}</td> <!-- Assuming doctor is related to a clinic -->
+                        <td>{{ $doctor->experience }} years</td>
+                        <td>{{ $doctor->status ? 'Inactive' : 'Active' }}</td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
         </div>
 
 

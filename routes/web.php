@@ -38,12 +38,17 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/home', fn () => view('home'))->name('home'); // Name the route for easier referencing
     Route::post("/bookslot",[AppointmentController::class,'bookSlot'])->name('book.slot');
-    Route::get('/showTimes', [AppointmentController::class, 'showTimeChoose'])->name('showTimes');
+    Route::post('/showTimes', [AppointmentController::class, 'showTimeChoose'])->name('showTimes');
 
     Route::get("/times",function(){return view("times");})->name('times');
     Route::get('/book-appointment', [AppointmentController::class, 'showBookingForm'])->name('appointment.form'); // Show booking form
     Route::post('/book-appointment', [AppointmentController::class, 'storePatientSymptoms'])->name('appointment.store');
     Route::get('/cancel-appointment', [AppointmentController::class, 'cancelAppointment'])->name('cancel.appointment');
+    Route::get("/showClinic", [AppointmentController::class , 'showClinic'])->name('showClinic');
+    Route::get("/showDoctor/{clinicId}", [AppointmentController::class , 'showDoctor'])->name('showDoctor');
+    Route::get('/save-doctor', [AppointmentController::class, 'saveDoctor'])->name('saveDoctor');
+
+
 
 });
 

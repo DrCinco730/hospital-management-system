@@ -19,12 +19,8 @@ return new class extends Migration
                 ->constrained('users')
                 ->onDelete('cascade');
 
-            $table->foreignId('city_id')
-                ->constrained('cities')
-                ->onDelete('cascade');
-
-            $table->foreignId('district_id')
-                ->constrained('districts')
+            $table->foreignId('doctor_id')
+                ->constrained('doctors') // or 'users' if doctors are stored there
                 ->onDelete('cascade');
 
             $table->foreignId('time_id')
@@ -34,11 +30,15 @@ return new class extends Migration
             // Appointment Details
             $table->date('appointment_date');
             // If you need to store time as well, consider using dateTime
-            // $table->dateTime('appointment_datetime');
+//             $table->dateTime('appointment_datetime');
 
             $table->enum('status', ['Pending', 'Done', 'Cancelled'])->default('Pending');
-
             $table->text('notes')->nullable();
+
+            $table->unique(
+                ['patient_id', 'doctor_id', 'appointment_date', 'time_id'],
+                'unique_patient_doctor_date_time'
+            );
 
             // Timestamps and Soft Deletes
             $table->timestamps();
