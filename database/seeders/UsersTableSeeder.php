@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -97,5 +98,7 @@ class UsersTableSeeder extends Seeder
                 'updated_at' => '2024-10-01 04:12:15'
             ],
         ]);
+        User::factory()->count(50)->create();
+
     }
 }

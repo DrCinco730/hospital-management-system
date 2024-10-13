@@ -35,8 +35,6 @@ class TimeSlotsSeeder extends Seeder
                 'start_time' => date('H:i:s', $currentTime),
                 'end_time' => date('H:i:s', $nextTime),
                 'duration' => ($nextTime - $currentTime) / 60,
-                'created_at' => now(),
-                'updated_at' => now(),
             ];
 
             // تحديث الوقت الحالي للوقت التالي

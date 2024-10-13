@@ -17,7 +17,6 @@ return new class extends Migration
             $table->id(); // Auto-incrementing ID
             $table->string('name'); // Column for the name of the symptom
             $table->boolean('is_emergency')->default(false); // Column indicating if the symptom is an emergency
-            $table->timestamps(); // Created at and updated at timestamps
         });
     }
 

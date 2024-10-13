@@ -13,6 +13,8 @@ class Symptom extends Model
      */
     protected $fillable = ['name', 'is_emergency'];
 
+    public $timestamps = false;
+
     /**
      * The attributes that should be cast to native types.
      *

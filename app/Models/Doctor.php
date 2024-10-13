@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Doctor extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes,HasFactory;
 
 
     protected $fillable = [
@@ -18,6 +19,9 @@ class Doctor extends Model
         'clinic_id',
         'experience_years',
     ];
+
+    public $timestamps = false;
+
 
     // Relationship with Clinic
     public function clinic(): BelongsTo

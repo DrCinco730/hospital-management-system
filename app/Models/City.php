@@ -16,8 +16,8 @@ class City extends Model
      * @var array
      */
     protected $fillable = ['name'];
+    public $timestamps = false;
 
-    protected $hidden = ['created_at', 'updated_at'];
 
     /**
      * Get the districts associated with the city.

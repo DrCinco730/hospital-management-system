@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 class CreateCitiesTable extends Migration
 {
 
-    public function up()
+    public function up(): void
     {
         Schema::create('cities', function (Blueprint $table) {
             $table->id();
@@ -16,7 +16,7 @@ class CreateCitiesTable extends Migration
     }
 
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('cities');
     }

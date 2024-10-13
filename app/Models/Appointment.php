@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Appointment extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes,HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -24,7 +25,7 @@ class Appointment extends Model
         'notes',
     ];
 
-    protected $dates = ['deleted_at'];
+    protected array $dates = ['deleted_at'];
 
 
     /**
@@ -42,28 +43,13 @@ class Appointment extends Model
      *
      * @return BelongsTo
      */
-    public function city(): BelongsTo
-    {
-        return $this->belongsTo(City::class);
-    }
-
-    /**
-     * Get the district associated with the appointment.
-     *
-     * @return BelongsTo
-     */
-    public function district(): BelongsTo
-    {
-        return $this->belongsTo(District::class);
-    }
-
-    /**
-     * Get the time slot associated with the appointment.
-     *
-     * @return BelongsTo
-     */
     public function timeSlot(): BelongsTo
     {
         return $this->belongsTo(TimeSlot::class, 'time_id');
+    }
+
+    public function doctor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'doctor_id');
     }
 }
