@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory,softDeletes;
     /**
      * The attributes that are mass assignable.
      *
@@ -24,7 +26,6 @@ class User extends Authenticatable
         'id_number',
         'city_id',
         'district_id',
-        'gender',
     ];
 
     /**
@@ -77,4 +78,14 @@ class User extends Authenticatable
     {
         return $this->belongsTo(District::class);
     }
+
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class);
+    }
+    public function patientSymptoms(): HasMany
+    {
+        return $this->hasMany(PatientSymptom::class, 'user_id');
+    }
+
 }

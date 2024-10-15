@@ -19,7 +19,7 @@
 <div class="wrapper">
     <div class="login_box">
         <div class="login-header">
-            <span>Account Created</span>
+            <span>Booking Created</span>
         </div>
         <!-- Icon Section using Google Material Icons -->
 {{--        <span class="material-icons icon">check_circle</span>--}}

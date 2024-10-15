@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Login;
 use App\Services\LoginService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,70 +23,84 @@ class LoginController extends Controller
     /**
      * Show the login form.
      *
-     * @return View
      */
-    public function showLoginForm(): View
+    public function showLoginForm()
     {
+        $username = $this->loginService->isAuthenticatedAcrossGuards();
+        if ($username) {
+            $type = Login::where('username', $username->username)->first()->type;
+
+            $redirectRoutes = [
+                'admin' => 'admin',
+                'staff' => 'staff',
+                'nurse' => 'nurse',
+                'user' => 'home',
+                'doctor' => 'doctor',
+            ];
+
+            return redirect()->intended($redirectRoutes[$type]);
+        }
         return view('auth.login');
     }
 
     /**
-     * Handle the login request.
-     *
-     * @param Request $request
-     * @return RedirectResponse
-     */
-    public function login(Request $request): RedirectResponse
-    {
-        // Validate the request
-        $validator = Validator::make($request->all(), [
-            'username' => 'required|string',
-            'password' => 'required|string',
-        ], [
-            'username.required' => 'Please enter your username.',
-            'password.required' => 'Please enter your password.',
-        ]);
+         * Handle the login request.
+         *
+         * @param Request $request
+         * @return RedirectResponse
+         */
+        function login(Request $request): RedirectResponse
+        {
+            // Validate the request
+            $validator = Validator::make($request->all(), [
+                'username' => 'required|string',
+                'password' => 'required|string',
+            ], [
+                'username.required' => 'Please enter your username.',
+                'password.required' => 'Please enter your password.',
+            ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            // Authenticate the user
+            $credentials = $request->only('username', 'password');
+            $user = $this->loginService->validateUserCredentials($credentials);
+
+            if (!$user) {
+                return redirect()->back()
+                    ->withErrors(['loginError' => 'Invalid username or password. Please try again.'])
+                    ->withInput();
+            }
+
+            $loginResult = $this->loginService->loginAs($user);
+
+            // Regenerate the session for security
+            $request->session()->regenerate();
+
+            // Redirect to the appropriate page with a success message
+            return redirect()->intended($loginResult['path'])->with('success', $loginResult['message']);
         }
 
-        // Authenticate the user
-        $credentials = $request->only('username', 'password');
-        $user = $this->loginService->validateUserCredentials($credentials);
+        /**
+         * Handle the logout request.
+         *
+         * @param Request $request
+         * @return RedirectResponse
+         */
+        public
+        function logout(Request $request): RedirectResponse
+        {
+            // Log the user out
+            Auth::logout();
 
-        if (!$user) {
-            return redirect()->back()
-                ->withErrors(['loginError' => 'Invalid username or password. Please try again.'])
-                ->withInput();
+            // Invalidate and regenerate the session
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect('/login')->with('success', 'You have successfully logged out.');
         }
-
-        $loginResult = $this->loginService->loginAs($user);
-
-        // Regenerate the session for security
-        $request->session()->regenerate();
-
-        // Redirect to the appropriate page with a success message
-        return redirect()->intended($loginResult['path'])->with('success', $loginResult['message']);
     }
-
-    /**
-     * Handle the logout request.
-     *
-     * @param Request $request
-     * @return RedirectResponse
-     */
-    public function logout(Request $request): RedirectResponse
-    {
-        // Log the user out
-        Auth::logout();
-
-        // Invalidate and regenerate the session
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect('/login')->with('success', 'You have successfully logged out.');
-    }
-}

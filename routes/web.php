@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\DoctorContoller;
+use App\Http\Controllers\NurseController;
 use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
@@ -59,9 +61,28 @@ Route::group(['middleware' => ['auth:admin']], function () {
     Route::post('/add-doctor', [AdminController::class, 'addDoctor'])->name('add-doctor');
     Route::post('/add-admin', [AdminController::class, 'addAdmin'])->name('add-admin');
     Route::post("/add-nurse", [AdminController::class, 'addNurse'])->name('add-nurse');
-    Route::post("add-staff", [AdminController::class, 'addGeneralStaff'])->name('add-staff');
+    Route::post("/add-staff", [AdminController::class, 'addGeneralStaff'])->name('add-staff');
+    Route::get("/showClinicDetails/{clinic_id}/{page}", [AdminController::class, 'ClinicDetails']);
+    Route::get("/showDoctorDetails", [AdminController::class, 'showDoctor']);
+    Route::get("/doctorBooking/{doctor_id}", [AdminController::class, 'DoctorBooking'])->name('doctorBooking');
+    Route::post("/deleteSomething", [AdminController::class, 'deleteSome'])->name('deleteSomething');
+    Route::get("/deleteClinic/{clinicID}", [AdminController::class, 'deleteClinic'])->name('deleteClinic');
+
+
 });
 
+Route::group(['middleware' => ['auth:doctor']], function () {
+    Route::get("/doctor",[DoctorContoller::class,'showPatient'])->name("doctor");
+});
+
+
+Route::group(['middleware' => ['auth:nurse']], function () {
+    Route::get("/nurse",[NurseController::class,'showPatient'])->name("nurse");
+});
+
+Route::group(['middleware' => ['auth:general_staff']], function () {
+    Route::get("/nurse",[NurseController::class,'showPatient'])->name("nurse");
+});
 
 Route::get('/account_created',function(){return view("AccountCreated");})->name('account_created');
 

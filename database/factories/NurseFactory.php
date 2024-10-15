@@ -2,24 +2,24 @@
 
 namespace Database\Factories;
 
-use App\Models\Doctor;
+use App\Models\Nurse;
 use App\Models\Clinic;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class DoctorFactory extends Factory
+class NurseFactory extends Factory
 {
-    protected $model = Doctor::class;
+    protected $model = Nurse::class;
 
     public function definition(): array
     {
-        // اختيار عيادة عشوائية
+        // اختيار عيادة عشوائية للممرض
         $clinic = Clinic::inRandomOrder()->first();
 
         return [
             'name' => $this->faker->name,
-            'specialty' => $this->faker->randomElement(['Cardiology', 'Neurology', 'Pediatrics', 'Dermatology']), // التخصص الطبي
+            'specialty' => $this->faker->randomElement(['General', 'Pediatrics', 'Surgical', 'Emergency', 'ICU']),
             'clinic_id' => $clinic->id,
-            'experience_years' => $this->faker->numberBetween(1, 30),
+            'experience' => $this->faker->numberBetween(1, 20),
             'email' => $this->faker->unique()->safeEmail,
             'username' => $this->faker->unique()->userName,
             'password' => '12345678',

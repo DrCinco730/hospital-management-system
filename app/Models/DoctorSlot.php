@@ -26,4 +26,5 @@ class DoctorSlot extends Model
     {
         return $this->belongsTo(Doctor::class);
     }
+
 }

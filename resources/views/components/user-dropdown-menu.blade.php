@@ -1,16 +1,38 @@
-<!-- قائمة المستخدم المنسدلة -->
+{{--<!-- قائمة المستخدم المنسدلة -->--}}
+{{--<div class="user-menu">--}}
+{{--    <div class="user-profile" onclick="toggleDropdown()">--}}
+{{--        <!-- أيقونة المستخدم -->--}}
+{{--        <i class="fas fa-user-circle user-icon"></i>--}}
+{{--    </div>--}}
+{{--    <!-- القائمة المنسدلة -->--}}
+{{--    <div id="dropdown-menu" class="dropdown-menu">--}}
+{{--        <div class="user-info">--}}
+{{--            <i class="fas fa-user-circle user-icon-large"></i>--}}
+{{--            <div>--}}
+{{--                <span class="user-name">{{ $name }}</span>--}}
+{{--                <span class="user-email">{{ $email }}</span>--}}
+{{--            </div>--}}
+{{--        </div>--}}
+{{--        <div class="dropdown-options">--}}
+{{--            <a href="#" class="dropdown-option">Account Settings</a>--}}
+{{--            <a href="#" class="dropdown-option logout" onclick="goToLogout()">Log Out</a>--}}
+{{--        </div>--}}
+{{--    </div>--}}
+{{--</div>--}}
 <div class="user-menu">
     <div class="user-profile" onclick="toggleDropdown()">
         <!-- أيقونة المستخدم -->
         <i class="fas fa-user-circle user-icon"></i>
+
     </div>
     <!-- القائمة المنسدلة -->
     <div id="dropdown-menu" class="dropdown-menu">
         <div class="user-info">
             <i class="fas fa-user-circle user-icon-large"></i>
             <div>
-                <span class="user-name">{{ $firstName }} {{ $lastName }}</span>
+                <span class="user-name">{{ $name }}</span>
                 <span class="user-email">{{ $email }}</span>
+
             </div>
         </div>
         <div class="dropdown-options">
@@ -21,7 +43,6 @@
 </div>
 
 <style>
-    /* تصميم معلومات المستخدم */
 
     .user-menu {
         position: fixed;
@@ -35,24 +56,27 @@
         border-radius: 10px;
         /* box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); */
         transition: background-color 0.3s ease, box-shadow 0.3s ease;
-        z-index: 1000; /* التأكد من أن الزر يظهر فوق كل العناصر الأخرى */
-
     }
 
+    /* تحسين تلوين الأيقونة */
     .user-icon {
         font-size: 40px;
         background: linear-gradient(135deg, #a6dded, #dce8f7);
+        /* تدرج لوني سماوي */
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-right: 10px;
         transition: transform 0.3s ease, color 0.3s ease;
     }
 
+
+    /* تكبير الأيقونة عند التفاعل */
     .user-icon:hover {
         transform: scale(1.2);
         color: #feb47b;
     }
 
+    /* تحسين تصميم القائمة المنسدلة */
     .dropdown-menu {
         position: absolute;
         top: 60px;
@@ -69,12 +93,14 @@
         transform: translateY(-15px);
     }
 
+    /* عرض القائمة عند إضافة فئة .show */
     .dropdown-menu.show {
         display: flex;
         opacity: 1;
         transform: translateY(0);
     }
 
+    /* تصميم المعلومات داخل القائمة */
     .user-info {
         display: flex;
         align-items: center;
@@ -83,6 +109,7 @@
         border-bottom: 1px solid #ececec;
     }
 
+    /* تحسين حجم الخطوص والألوان */
     .user-name {
         font-weight: bold;
         font-size: 18px;
@@ -94,6 +121,7 @@
         color: #666;
     }
 
+    /* الأيقونة الكبيرة داخل القائمة */
     .user-icon-large {
         font-size: 30px;
         color: #ffffff;
@@ -105,11 +133,13 @@
         transition: background-color 0.3s ease, transform 0.3s ease;
     }
 
+    /* تغيير لون الأيقونة عند التفاعل */
     .user-icon-large:hover {
         background-color: #555;
         transform: scale(1.1);
     }
 
+    /* تصميم الخيارات */
     .dropdown-options {
         display: flex;
         flex-direction: column;
@@ -127,12 +157,14 @@
         box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
     }
 
+    /* تغيير لون الخلفية عند التفاعل */
     .dropdown-option:hover {
         background-color: #ececec;
         box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
         transform: scale(1.02);
     }
 
+    /* زر تسجيل الخروج بلون أحمر */
     .logout {
         color: #ff4d4d;
     }

@@ -21,7 +21,6 @@ class CreateUsersTable extends Migration
             $table->foreignId('district_id')->constrained('districts')->onDelete('cascade'); // Foreign key to districts
             $table->date('date_of_birth'); // Date of birth
             $table->string('id_number')->unique(); // Unique ID number
-            $table->enum('gender', ['male', 'female', 'other']); // Gender selection
             $table->rememberToken(); // Token for "remember me" functionality
             $table->timestamps(); // Created at and updated at timestamps
             $table->softDeletes(); // Adds deleted_at column for soft deletes

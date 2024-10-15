@@ -8,6 +8,8 @@
     <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Poppins&display=swap'>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/notiflix@3/dist/notiflix-aio-3.2.5.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" href="{{ asset('css/style_admin.css') }}">
 </head>
 
@@ -32,7 +34,7 @@
     </div>
     <ul class="sidebar-menu">
         <li><button class="button" onclick="showForm('clinicForm', 'Add Clinic')">
-                <i class="fas fa-hospital"></i> Add Clinic
+                <i class="fas fa-clinic-medical"></i> Add Clinic
             </button></li>
         <li><button class="button" onclick="showForm('doctorForm', 'Add Doctor')">
                 <i class="fas fa-user-md"></i> Add Doctor
@@ -44,11 +46,17 @@
         </li>
         <li>
             <button class="button" onclick="showForm('staffForm', 'Add General Staff')">
-                <i class="fas fa-users-cog"></i> Add General Staff
+                <i class="fas fa-user-cog"></i> Add General Staff
             </button>
         </li>
-        <li><button class="button" onclick="showForm('doctorBooking', 'Doctor Booking')">
-                <i class="fas fa-user-doctor"></i> Doctor Booking
+        <!-- Clinic Management Section -->
+        <li>
+            <button class="button" onclick="showForm('clinicManagement', 'Clinic Management')">
+                <i class="fas fa-clinic-medical"></i> <i class="fas fa-cogs"></i> Clinic Management
+            </button>
+        </li>
+        <li><button class="button" id="doctorBook">
+                <i class="fas fa-calendar-check"></i> Doctor Booking
             </button></li>
         <li><button class="button" onclick="showForm('medicationBooking', 'Medication Booking')">
                 <i class="fas fa-pills"></i> Medication Booking
@@ -65,14 +73,13 @@
             </button>
         </li>
         <li><button id="addAdminButton" class="button" onclick="showForm('addAdminForm', 'Add Admin')">
-                <i class="fas fa-user-shield"></i> Add Admin
+                <i class="fas fa-user-tie"></i> Add Admin
             </button></li>
         <li><button class="button" onclick="Logout()">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </button></li>
-
-
     </ul>
+
 </div>
 
 <!-- Main Content Wrapper -->
@@ -82,9 +89,9 @@
             <span id="dynamicTitle">Admin Dashboard</span>
         </div>
 
-        <div class="welcome-text">
-            <p>Select one of the options on the left to manage clinics, doctors, bookings, or view users.</p>
-        </div>
+{{--        <div class="welcome-text">--}}
+{{--            <p>Select one of the options on the left to manage clinics, doctors, bookings, or view users.</p>--}}
+{{--        </div>--}}
 
         <div id="clinicForm" class="content-section" style="display: none;">
             <form class="form-container" method="post" action="{{ route('add-clinic') }}">
@@ -190,6 +197,38 @@
             </script>
         @endif
 
+
+        <!-- Clinic Management Section -->
+        <div id="clinicManagement" class="content-section">
+{{--            <h2>Clinic Management</h2>--}}
+            <div class="clinic-cards-container">
+                @foreach($clinics as $clinic)
+                    <div class="clinic-card" id="clinic-{{ $clinic['id'] }}">
+                        <img src="{{ asset('images/image.webp') }}" alt="Clinic Image" class="clinic-card-img">
+                        <div class="card-content">
+                            <h3>{{ $clinic['name'] }}</h3>
+
+                            <!-- زر عرض المعلومات -->
+                            <!-- Button to show clinic details -->
+                            <button class="button show-info-button" data-clinic-id="{{ $clinic['id'] }}">Show Details</button>
+
+                            <div class="clinic-card-actions">
+                                <!-- زر التعديل -->
+                                <button class="button edit-button" data-clinic-id="{{ $clinic['id'] }}">Edit</button>
+
+                                <!-- زر الحذف -->
+                                <button class="button delete-button" onclick="deleteClinic('{{ $clinic['name'] }}','{{ $clinic['id'] }}')">Delete</button>
+                            </div>
+
+                            <div class="details-section" id="details-{{ $clinic['id'] }}" style="display: none;">
+                                <p>Additional information is not available.</p>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
         <!-- Add Doctor Form -->
         <div id="doctorForm" class="content-section" style="display: none;">
             <form class="form-container" method="post" action="{{ route('add-doctor') }}">
@@ -202,6 +241,22 @@
                     @error('name')
                     <span class="error-message">{{ $message }}</span>
                     @enderror
+                </div>
+                <div class="input_box">
+                    <input type="email" id="email" class="input-field" required>
+                    <label for="email" class="label">Email</label>
+                    <i class="bx bx-envelope icon"></i>
+                </div>
+
+                <div class="input_box">
+                    <input type="text" class="input-field" id="Username" required>
+                    <label class="label" for="Username">Username</label>
+                    <i class="icon fas fa-user"></i>
+                </div>
+                <div class="input_box">
+                    <input type="password" class="input-field" id="Password" required>
+                    <label class="label" for="Password">Password</label>
+                    <i class="icon fas fa-lock"></i>
                 </div>
 
                 <div class="input_box">
@@ -254,6 +309,23 @@
                 </div>
 
                 <div class="input_box">
+                    <input type="email" id="email" class="input-field" required>
+                    <label for="email" class="label">Email</label>
+                    <i class="bx bx-envelope icon"></i>
+                </div>
+
+                <div class="input_box">
+                    <input type="text" class="input-field" id="Username" required>
+                    <label class="label" for="Username">Username</label>
+                    <i class="icon fas fa-user"></i>
+                </div>
+                <div class="input_box">
+                    <input type="password" class="input-field" id="Password" required>
+                    <label class="label" for="Password">Password</label>
+                    <i class="icon fas fa-lock"></i>
+                </div>
+
+                <div class="input_box">
                     <input type="text" name="specialty" class="input-field" id="nurseSpecialty" required>
                     <label class="label" for="nurseSpecialty">Specialty</label>
                     <i class="icon fas fa-stethoscope"></i>
@@ -301,6 +373,22 @@
                     @error('name')
                     <span class="error-message">{{ $message }}</span>
                     @enderror
+                </div>
+                <div class="input_box">
+                    <input type="email" id="email" class="input-field" required>
+                    <label for="email" class="label">Email</label>
+                    <i class="bx bx-envelope icon"></i>
+                </div>
+
+                <div class="input_box">
+                    <input type="text" class="input-field" id="Username" required>
+                    <label class="label" for="Username">Username</label>
+                    <i class="icon fas fa-user"></i>
+                </div>
+                <div class="input_box">
+                    <input type="password" class="input-field" id="Password" required>
+                    <label class="label" for="Password">Password</label>
+                    <i class="icon fas fa-lock"></i>
                 </div>
 
                 <div class="input_box">
@@ -413,32 +501,6 @@
         </div>
 
 
-        <!-- Other sections like Doctor Booking, Medication Booking, Vaccine Booking, etc. -->
-        <div id="doctorBooking" class="content-section" style="display: none;">
-            <table>
-                <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Patient Name</th>
-                    <th>Doctor Name</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Status</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>John Doe</td>
-                    <td>Dr. Smith</td>
-                    <td>2024-10-10</td>
-                    <td>10:00 AM</td>
-                    <td>Confirmed</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-
         <!-- Medication Booking Section -->
         <div id="medicationBooking" class="content-section" style="display: none;">
             <table>
@@ -515,10 +577,25 @@
             </table>
         </div>
 
-    </div>
+        <div id='editClinicForm' class="content-section" style="display: none;">
+        </div>
+
+        <div id='showClinicDetails' class="content-section" style="display: none;">
+        </div>
+
+        <div id='showDoctors' class="content-section" style="display: none;">
+        </div>
+
+        <div id="doctorBooking" class="content-section" style="display: none;">
+        </div>
+
+
+
+        </div>
 </div>
 
 <script>
+
     document.addEventListener('DOMContentLoaded', function() {
         @if(session('showForm') === 'addAdminForm')
         // Trigger the 'Add Admin' button automatically
@@ -557,16 +634,91 @@
     function showForm(formId, title) {
         // Hide all sections
         const sections = document.querySelectorAll('.content-section');
-        sections.forEach(section => section.style.display = 'none');
+        sections.forEach(section => {
+            section.classList.remove('animate__animated', 'animate__fadeIn'); // Remove previous animation classes
+            section.style.display = 'none';
+        });
 
-        // Show the requested section
-        document.getElementById(formId).style.display = 'block';
+        // Show the requested section with animation
+        const selectedSection = document.getElementById(formId);
+        selectedSection.style.display = 'block';
+        selectedSection.classList.add('animate__animated', 'animate__fadeIn'); // Add animation classes
 
         // Update the title based on the function
         document.getElementById('dynamicTitle').innerText = title;
     }
+
+
+    function deleteClinic(clinicName, clinicId) {
+        if (confirm(`Are you sure you want to delete ${clinicName}?`)) {
+            $.ajax({
+                url: `/deleteClinic/${clinicId}`, // Make sure this route exists in your routes file
+                type: 'GET', // Use the DELETE HTTP method
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // CSRF token for security
+                },
+                success: function(response) {
+                    if (response) {
+                        // Successfully deleted, remove clinic from the UI
+                        $(`#clinic-${clinicId}`).remove();
+                        Notiflix.Notify.success('Clinic deleted successfully.');
+                    } else {
+                        // Handle server response error
+                        Notiflix.Notify.failure(response.message || 'Failed to delete the clinic.');
+                    }
+                },
+                error: function(xhr) {
+                    Notiflix.Notify.failure('An error occurred while trying to delete the clinic.');
+                }
+            });
+        }
+    }
+
 </script>
+<script>
+    // Real-time validation for input fields
+    document.querySelectorAll('.input-field').forEach(input => {
+        input.addEventListener('input', function () {
+            validateInput(this);
+        });
+    });
+
+    function validateInput(input) {
+        let errorSpan = input.nextElementSibling;
+
+        if (input.value.trim() === '') {
+            errorSpan.textContent = `${input.getAttribute('name')} is required`;
+            input.classList.add('input-error');
+        } else if (input.getAttribute('type') === 'email' && !validateEmail(input.value)) {
+            errorSpan.textContent = `Please enter a valid email address`;
+            input.classList.add('input-error');
+        } else if (input.getAttribute('type') === 'number' && input.value < 0) {
+            errorSpan.textContent = `Please enter a positive number`;
+            input.classList.add('input-error');
+        } else {
+            errorSpan.textContent = '';
+            input.classList.remove('input-error');
+        }
+    }
+
+    function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(String(email).toLowerCase());
+    }
+</script>
+
 <style>
+    .input-error {
+        border-color: red;
+    }
+
+    .error-message {
+        color: red;
+        font-size: 0.9em;
+        margin-top: 5px;
+        display: block;
+    }
+
 
     body {
         background-image: url("{{ asset('images/backgrond.webp') }}"); /* Set background image */
@@ -584,8 +736,240 @@
         margin-top: 5px;
         display: block;
     }
+    /* resources/css/app.css */
+
+    /* Clinic Card Styling */
+    .clinic-card {
+        flex: 1 1 180px;
+        max-width: 220px;
+        min-height: 250px;
+        border-radius: 15px;
+        background: linear-gradient(145deg, #ffffff, #f9f9f9);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        cursor: pointer;
+    }
+
+    .clinic-card.expanded {
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease-in-out;
+    }
+
+    .clinic-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .clinic-card-img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+        transition: filter 0.3s ease;
+    }
+
+    .clinic-card:hover .clinic-card-img {
+        filter: brightness(1);
+    }
+
+    .card-content {
+        padding: 15px;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex-grow: 1;
+    }
+
+    .card-content h3 {
+        font-size: 18px;
+        color: #1e1e1e;
+        margin-bottom: 8px;
+        font-weight: bold;
+    }
+
+    .edit-button,
+    .delete-button {
+        flex-grow: 1;
+        padding: 8px 10px;
+        font-size: 10px;
+        border-radius: 25px;
+        color: #fff;
+        border: none;
+        transition: background 0.3s ease, transform 0.3s ease;
+        margin: 2px;
+    }
+
+    .edit-button {
+        background-color: #e08e0b;
+    }
+
+    .edit-button:hover {
+        background-color: #e08e0b;
+        transform: scale(1.05);
+    }
+
+    .delete-button {
+        background-color: #d62c1a;
+    }
+
+    .delete-button:hover {
+        background-color: #d62c1a;
+        transform: scale(1.05);
+    }
+
+    .show-info-button {
+        margin-top: 10px;
+        background-color: #15926c;
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        font-size: 12px;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .show-info-button:hover {
+        background-color: #15926c;
+        transform: scale(1.05);
+    }
+
+    .details-section {
+        display: none;
+    }
+
+    .clinic-card-actions {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 10px;
+    }
+
 
 </style>
+<script>
+    $(document).ready(function() {
+        $('.button').on('click', function(event) {
+            const targetId = event.target.id;
+
+            if (targetId === 'doctorBook') {
+                loadDoctorBooking();
+            } else if ($(this).hasClass('edit-button')) {
+                const clinicId = $(this).data('clinic-id');
+                loadEditClinicForm(clinicId);
+            } else if ($(this).hasClass('show-info-button')) {
+                const clinicId = $(this).data('clinic-id');
+                loadClinicInfo(clinicId);
+            }
+        });
+
+        function loadDoctorBooking() {
+            $.get('/showDoctorDetails', function(response) {
+                $('#showClinicDetails').html(response).show();
+                showForm('showClinicDetails', 'Doctor Booking');
+            }).fail(function() {
+                alert('Error loading doctor details.');
+            });
+        }
+
+        function loadEditClinicForm(clinicId) {
+            $.get(`/showClinicDetails/${clinicId}/edit`, function(response) {
+                $('#editClinicForm').html(response).show();
+                showForm('editClinicForm', 'Edit Clinic Staff');
+            }).fail(function() {
+                alert('Error loading clinic details.');
+            });
+        }
+
+        function loadClinicInfo(clinicId) {
+            $.get(`/showClinicDetails/${clinicId}/show`, function(response) {
+                $('#showClinicDetails').html(response).show();
+                showForm('showClinicDetails', 'Clinic Staff Overview');
+            }).fail(function() {
+                alert('Error loading clinic details.');
+            });
+        }
+    });
+
+</script>
+
+{{--<script>--}}
+
+
+{{--</script>--}}
+<script>
+    $(document).ready(function() {
+        // Use event delegation to handle dynamically loaded buttons
+        $(document).on('click', '.select-doctor-button', function() {
+            // Get the clinic_id from the button's data attribute
+            const clinicId = $(this).data('clinic-id');
+
+            // Make the AJAX GET request, including the clinic_id in the URL
+            $.ajax({
+                url: `/doctorBooking/${clinicId}`, // dynamically add clinic_id here
+                type: 'GET',
+                success: function(response) {
+                    // Load the returned HTML into the editClinicForm section
+                    $('#doctorBooking').html(response).show();
+                    showForm('doctorBooking', 'Doctor Booking ');
+                },
+                error: function(xhr) {
+                    alert('Error loading clinic details. Please try again.');
+                }
+            });
+        });
+    });
+</script>
+{{--<script>--}}
+{{--    $(document).ready(function() {--}}
+{{--        // Use event delegation to handle dynamically loaded buttons--}}
+{{--        $(document).on('click', '.show-info-button', function() {--}}
+{{--            // Get the clinic_id from the button's data attribute--}}
+{{--            const clinicId = $(this).data('clinic-id');--}}
+
+{{--            // Make the AJAX GET request, including the clinic_id in the URL--}}
+{{--            $.ajax({--}}
+{{--                url: `/showClinicDetails/${clinicId}/show`, // dynamically add clinic_id here--}}
+{{--                type: 'GET',--}}
+{{--                success: function(response) {--}}
+{{--                    // Load the returned HTML into the editClinicForm section--}}
+{{--                    $('#showClinicDetails').html(response).show();--}}
+{{--                    showForm('showClinicDetails', 'Clinic Staff Overview');--}}
+{{--                },--}}
+{{--                error: function(xhr) {--}}
+{{--                    alert('Error loading clinic details. Please try again.');--}}
+{{--                }--}}
+{{--            });--}}
+{{--        });--}}
+{{--    });--}}
+{{--</script>--}}
+{{--<script>--}}
+{{--    $(document).ready(function() {--}}
+{{--        // Use event delegation to handle dynamically loaded buttons--}}
+{{--        $(document).on('click', '#doctorBook', function() {--}}
+{{--            // Get the clinic_id from the button's data attribute--}}
+{{--            // Make the AJAX GET request, including the clinic_id in the URL--}}
+{{--            $.ajax({--}}
+{{--                url: `/showDoctorDetails`, // dynamically add clinic_id here--}}
+{{--                type: 'GET',--}}
+{{--                success: function(response) {--}}
+{{--                    // Load the returned HTML into the editClinicForm section--}}
+{{--                    $('#showDoctors').html(response).show();--}}
+{{--                    showForm('doctorBooking', 'Doctor Booking');--}}
+{{--                },--}}
+{{--                error: function(xhr) {--}}
+{{--                    alert('Error loading clinic details. Please try again.');--}}
+{{--                }--}}
+{{--            });--}}
+{{--        });--}}
+{{--    });--}}
+{{--</script>--}}
+
 </body>
 
 </html>

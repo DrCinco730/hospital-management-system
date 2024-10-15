@@ -185,20 +185,6 @@
                     @enderror
                 </div>
 
-                <!-- Gender -->
-                <div class="input_box">
-                    <select name="gender" class="input-field" required>
-                        <option value="" disabled selected>Select Gender</option>
-                        <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Male</option>
-                        <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
-                        <option value="other" {{ old('gender') == 'other' ? 'selected' : '' }}>Other</option>
-                    </select>
-                    <i class="bx bx-male-female icon"></i>
-                    @error('gender')
-                        <span class="error-message">{{ $message }}</span>
-                    @enderror
-                </div>
-
                 <!-- Submit Button -->
                 <button type="submit" class="input-submit">Sign Up</button>
 

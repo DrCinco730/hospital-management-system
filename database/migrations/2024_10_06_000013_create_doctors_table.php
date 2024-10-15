@@ -13,6 +13,11 @@ return new class extends Migration
             $table->string('name');
             $table->string('specialty');
             $table->foreignId('clinic_id')->constrained('clinics')->onDelete('cascade');
+            $table->string('email')->unique();
+            $table->string('username')->unique();
+            $table->string('password');
+            $table->rememberToken();
+
             $table->integer('experience_years');
             $table->softDeletes(); // Adds deleted_at column for soft deletes
         });

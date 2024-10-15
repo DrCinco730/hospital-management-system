@@ -17,6 +17,10 @@ return new class extends Migration
             $table->string('specialty');
             $table->unsignedBigInteger('clinic_id');
             $table->integer('experience');
+            $table->string('email')->unique();
+            $table->string('username')->unique();
+            $table->string('password');
+            $table->rememberToken();
             $table->timestamps();
 
             // Foreign key reference to clinics table

@@ -23,7 +23,6 @@ class UserService
             'id_number'     => 'required|string|max:20|unique:users',
             'city_id'       => 'required|exists:cities,id',
             'district_id'   => 'required|exists:districts,id',
-            'gender'        => 'required|in:male,female,other',
         ])->validate();
     }
 }

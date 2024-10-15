@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Auth\Authenticatable;
 
-class UserAdmin extends Model implements AuthenticatableContract
+class Login extends Model implements AuthenticatableContract
 {
     use Authenticatable;
 
-    protected $table = 'user_admin_view'; // اسم الـ View
+    protected $table = 'login_view'; // اسم الـ View
     public $timestamps = false;
 
     protected $fillable = [

@@ -11,12 +11,21 @@ return new class extends Migration
     public function up(): void
     {
         DB::statement("
-            CREATE VIEW user_admin_view AS
+            CREATE VIEW login_view AS
             SELECT id, username, password, 'user' AS type
             FROM users
             UNION
             SELECT id, username, password, 'admin' AS type
             FROM admins
+            UNION
+            SELECT id, username, password, 'nurse' AS type
+            FROM nurses
+            UNION
+            SELECT id, username, password, 'staff' AS type
+            FROM general_staff
+             UNION
+            SELECT id, username, password, 'doctor' AS type
+            FROM doctors
         ");
     }
 
@@ -25,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("DROP VIEW IF EXISTS user_admin_view");
+        DB::statement("DROP VIEW IF EXISTS login_view");
     }
 };

@@ -28,7 +28,6 @@ class UsersTableSeeder extends Seeder
                 'district_id' => 1,
                 'date_of_birth' => '2000-10-11',
                 'id_number' => '123123',
-                'gender' => 'female',
                 'remember_token' => NULL,
                 'created_at' => '2024-10-01 23:07:48',
                 'updated_at' => '2024-10-01 23:07:48'
@@ -44,7 +43,6 @@ class UsersTableSeeder extends Seeder
                 'district_id' => 27,
                 'date_of_birth' => '2001-10-20',
                 'id_number' => '252525',
-                'gender' => 'female',
                 'remember_token' => NULL,
                 'created_at' => '2024-10-01 23:10:05',
                 'updated_at' => '2024-10-01 23:10:05'
@@ -60,7 +58,6 @@ class UsersTableSeeder extends Seeder
                 'district_id' => 19,
                 'date_of_birth' => '2002-10-24',
                 'id_number' => '12542',
-                'gender' => 'female',
                 'remember_token' => NULL,
                 'created_at' => '2024-10-01 23:12:05',
                 'updated_at' => '2024-10-01 23:12:05'
@@ -76,7 +73,6 @@ class UsersTableSeeder extends Seeder
                 'district_id' => 11,
                 'date_of_birth' => '1990-05-15',
                 'id_number' => '1234567890',
-                'gender' => 'male',
                 'remember_token' => bcrypt("123456789"),
                 'created_at' => '2024-10-01 04:12:15',
                 'updated_at' => '2024-10-01 04:12:15'
@@ -92,7 +88,6 @@ class UsersTableSeeder extends Seeder
                 'district_id' => 11,
                 'date_of_birth' => '1985-08-20',
                 'id_number' => '0987654321',
-                'gender' => 'female',
                 'remember_token' => NULL,
                 'created_at' => '2024-10-01 04:12:15',
                 'updated_at' => '2024-10-01 04:12:15'

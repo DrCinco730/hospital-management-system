@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{ asset('css/style.css') }}"> <!-- External stylesheet -->
 </head>
 <body>
+<x-popup-message/>
     <div class="wrapper">
         <div class="login_box">
             <div class="login-header">
