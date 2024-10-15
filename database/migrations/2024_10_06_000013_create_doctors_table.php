@@ -13,9 +13,9 @@ return new class extends Migration
             $table->string('name');
             $table->string('specialty');
             $table->foreignId('clinic_id')->constrained('clinics')->onDelete('cascade');
-            $table->string('email')->unique();
-            $table->string('username')->unique();
-            $table->string('password');
+            $table->string('username')->unique(); // Unique username
+            $table->string('email')->unique(); // Unique email address
+            $table->string('password'); // Password (hashed)
             $table->rememberToken();
 
             $table->integer('experience_years');

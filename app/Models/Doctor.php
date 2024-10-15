@@ -33,6 +33,29 @@ class Doctor extends Authenticatable
     public $timestamps = false;
 
 
+    protected static function booted()
+    {
+        static::created(function ($doctor) {
+            // List of working days
+            $workingDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+
+            // Work hours
+            $startTime = '08:00:00';
+            $endTime = '17:00:00';
+
+            // Create slots for each working day
+            foreach ($workingDays as $day) {
+                DoctorSlot::create([
+                    'doctor_id' => $doctor->id,
+                    'day' => $day,
+                    'start_time' => $startTime,
+                    'end_time' => $endTime,
+                ]);
+            }
+        });
+    }
+
+
     // Relationship with Clinic
     public function clinic(): BelongsTo
 
@@ -55,3 +78,7 @@ class Doctor extends Authenticatable
     }
 
 }
+
+
+
+

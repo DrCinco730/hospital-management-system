@@ -89,9 +89,9 @@
             <span id="dynamicTitle">Admin Dashboard</span>
         </div>
 
-{{--        <div class="welcome-text">--}}
-{{--            <p>Select one of the options on the left to manage clinics, doctors, bookings, or view users.</p>--}}
-{{--        </div>--}}
+        {{--        <div class="welcome-text">--}}
+        {{--            <p>Select one of the options on the left to manage clinics, doctors, bookings, or view users.</p>--}}
+        {{--        </div>--}}
 
         <div id="clinicForm" class="content-section" style="display: none;">
             <form class="form-container" method="post" action="{{ route('add-clinic') }}">
@@ -200,7 +200,7 @@
 
         <!-- Clinic Management Section -->
         <div id="clinicManagement" class="content-section">
-{{--            <h2>Clinic Management</h2>--}}
+            {{--            <h2>Clinic Management</h2>--}}
             <div class="clinic-cards-container">
                 @foreach($clinics as $clinic)
                     <div class="clinic-card" id="clinic-{{ $clinic['id'] }}">
@@ -234,33 +234,59 @@
             <form class="form-container" method="post" action="{{ route('add-doctor') }}">
                 @csrf
 
+                <!-- Doctor Name -->
                 <div class="input_box">
-                    <input type="text" name="name" class="input-field" id="doctorName" required>
+                    <input type="text" name="name" class="input-field" id="doctorName" value="{{ old('name') }}" required>
                     <label class="label" for="doctorName">Doctor Name</label>
                     <i class="icon fas fa-user-md"></i>
                     @error('name')
                     <span class="error-message">{{ $message }}</span>
                     @enderror
                 </div>
+
+                <!-- Email -->
                 <div class="input_box">
-                    <input type="email" id="email" class="input-field" required>
+                    <input type="email" name="email" class="input-field" id="email" value="{{ old('email') }}" required>
                     <label for="email" class="label">Email</label>
                     <i class="bx bx-envelope icon"></i>
+                    @error('email')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
                 </div>
 
+                <!-- Username -->
                 <div class="input_box">
-                    <input type="text" class="input-field" id="Username" required>
+                    <input type="text" name="username" class="input-field" id="Username" value="{{ old('username') }}" required>
                     <label class="label" for="Username">Username</label>
                     <i class="icon fas fa-user"></i>
-                </div>
-                <div class="input_box">
-                    <input type="password" class="input-field" id="Password" required>
-                    <label class="label" for="Password">Password</label>
-                    <i class="icon fas fa-lock"></i>
+                    @error('username')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
                 </div>
 
+                <!-- Password -->
                 <div class="input_box">
-                    <input type="text" name="specialty" class="input-field" id="doctorSpecialty" required>
+                    <input type="password" name="password" class="input-field" id="Password" required>
+                    <label class="label" for="Password">Password</label>
+                    <i class="icon fas fa-lock"></i>
+                    @error('password')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Password Confirmation -->
+                <div class="input_box">
+                    <input type="password" name="password_confirmation" class="input-field" id="PasswordConfirmation" required>
+                    <label class="label" for="PasswordConfirmation">Confirm Password</label>
+                    <i class="icon fas fa-lock"></i>
+                    @error('password_confirmation')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Specialty -->
+                <div class="input_box">
+                    <input type="text" name="specialty" class="input-field" id="doctorSpecialty" value="{{ old('specialty') }}" required>
                     <label class="label" for="doctorSpecialty">Specialty</label>
                     <i class="icon fas fa-stethoscope"></i>
                     @error('specialty')
@@ -268,11 +294,12 @@
                     @enderror
                 </div>
 
+                <!-- Clinic Selection -->
                 <div class="input_box">
                     <select name="clinic_id" class="input-field" id="doctorClinic" required>
                         <option value="" disabled selected>Select Clinic</option>
                         @foreach($clinics as $clinic)
-                            <option value="{{ $clinic->id }}">{{ $clinic->name }}</option>
+                            <option value="{{ $clinic->id }}" {{ old('clinic_id') == $clinic->id ? 'selected' : '' }}>{{ $clinic->name }}</option>
                         @endforeach
                     </select>
                     <i class="icon fas fa-hospital"></i>
@@ -281,8 +308,9 @@
                     @enderror
                 </div>
 
+                <!-- Experience -->
                 <div class="input_box">
-                    <input type="number" name="experience" class="input-field" id="doctorExperience" required min="0">
+                    <input type="number" name="experience" class="input-field" id="doctorExperience" value="{{ old('experience') }}" required min="0">
                     <label class="label" for="doctorExperience">Years of Experience</label>
                     <i class="icon fas fa-briefcase"></i>
                     @error('experience')
@@ -294,13 +322,30 @@
             </form>
         </div>
 
+    @if(session('success'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Notiflix.Report.success('Success!', '{{ session('success') }}', 'OK');
+                });
+            </script>
+        @endif
+
+        @if(session('error'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Notiflix.Report.failure('Error!', '{{ session('error') }}', 'OK');
+                });
+            </script>
+        @endif
+
         <!-- Add Nurse Form -->
         <div id="nurseForm" class="content-section" style="display: none;">
             <form class="form-container" method="post" action="{{ route('add-nurse') }}">
                 @csrf <!-- Adding CSRF token for security -->
 
+                <!-- Nurse Name -->
                 <div class="input_box">
-                    <input type="text" name="name" class="input-field" id="nurseName" required>
+                    <input type="text" name="name" class="input-field" id="nurseName" value="{{ old('name') }}" required>
                     <label class="label" for="nurseName">Nurse Name</label>
                     <i class="icon fas fa-user-nurse"></i>
                     @error('name')
@@ -308,25 +353,9 @@
                     @enderror
                 </div>
 
+                <!-- Specialty -->
                 <div class="input_box">
-                    <input type="email" id="email" class="input-field" required>
-                    <label for="email" class="label">Email</label>
-                    <i class="bx bx-envelope icon"></i>
-                </div>
-
-                <div class="input_box">
-                    <input type="text" class="input-field" id="Username" required>
-                    <label class="label" for="Username">Username</label>
-                    <i class="icon fas fa-user"></i>
-                </div>
-                <div class="input_box">
-                    <input type="password" class="input-field" id="Password" required>
-                    <label class="label" for="Password">Password</label>
-                    <i class="icon fas fa-lock"></i>
-                </div>
-
-                <div class="input_box">
-                    <input type="text" name="specialty" class="input-field" id="nurseSpecialty" required>
+                    <input type="text" name="specialty" class="input-field" id="nurseSpecialty" value="{{ old('specialty') }}" required>
                     <label class="label" for="nurseSpecialty">Specialty</label>
                     <i class="icon fas fa-stethoscope"></i>
                     @error('specialty')
@@ -339,7 +368,7 @@
                     <select name="clinic_id" class="input-field" id="nurseClinic" required>
                         <option value="" disabled selected>Select Clinic</option>
                         @foreach($clinics as $clinic)
-                            <option value="{{ $clinic->id }}">{{ $clinic->name }}</option>
+                            <option value="{{ $clinic->id }}" {{ old('clinic_id') == $clinic->id ? 'selected' : '' }}>{{ $clinic->name }}</option>
                         @endforeach
                     </select>
                     <i class="icon fas fa-hospital"></i>
@@ -348,11 +377,52 @@
                     @enderror
                 </div>
 
+                <!-- Experience -->
                 <div class="input_box">
-                    <input type="number" name="experience" class="input-field" id="nurseExperience" required min="0">
+                    <input type="number" name="experience" class="input-field" id="nurseExperience" value="{{ old('experience') }}" required min="0">
                     <label class="label" for="nurseExperience">Years of Experience</label>
                     <i class="icon fas fa-briefcase"></i>
                     @error('experience')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Email -->
+                <div class="input_box">
+                    <input type="email" name="email" class="input-field" id="nurseEmail" value="{{ old('email') }}" required>
+                    <label class="label" for="nurseEmail">Email</label>
+                    <i class="icon fas fa-envelope"></i>
+                    @error('email')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Username -->
+                <div class="input_box">
+                    <input type="text" name="username" class="input-field" id="nurseUsername" value="{{ old('username') }}" required>
+                    <label class="label" for="nurseUsername">Username</label>
+                    <i class="icon fas fa-user"></i>
+                    @error('username')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Password -->
+                <div class="input_box">
+                    <input type="password" name="password" class="input-field" id="nursePassword" required>
+                    <label class="label" for="nursePassword">Password</label>
+                    <i class="icon fas fa-lock"></i>
+                    @error('password')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Password Confirmation -->
+                <div class="input_box">
+                    <input type="password" name="password_confirmation" class="input-field" id="nursePasswordConfirmation" required>
+                    <label class="label" for="nursePasswordConfirmation">Confirm Password</label>
+                    <i class="icon fas fa-lock"></i>
+                    @error('password_confirmation')
                     <span class="error-message">{{ $message }}</span>
                     @enderror
                 </div>
@@ -361,38 +431,26 @@
             </form>
         </div>
 
+
+        <!-- Add General Staff Form -->
         <!-- Add General Staff Form -->
         <div id="staffForm" class="content-section" style="display: none;">
             <form class="form-container" method="post" action="{{ route('add-staff') }}">
                 @csrf <!-- Adding CSRF token for security -->
 
+                <!-- Staff Name -->
                 <div class="input_box">
-                    <input type="text" name="name" class="input-field" id="staffName" required>
+                    <input type="text" name="name" class="input-field" id="staffName" value="{{ old('name') }}" required>
                     <label class="label" for="staffName">Staff Name</label>
                     <i class="icon fas fa-user"></i>
                     @error('name')
                     <span class="error-message">{{ $message }}</span>
                     @enderror
                 </div>
-                <div class="input_box">
-                    <input type="email" id="email" class="input-field" required>
-                    <label for="email" class="label">Email</label>
-                    <i class="bx bx-envelope icon"></i>
-                </div>
 
+                <!-- Role -->
                 <div class="input_box">
-                    <input type="text" class="input-field" id="Username" required>
-                    <label class="label" for="Username">Username</label>
-                    <i class="icon fas fa-user"></i>
-                </div>
-                <div class="input_box">
-                    <input type="password" class="input-field" id="Password" required>
-                    <label class="label" for="Password">Password</label>
-                    <i class="icon fas fa-lock"></i>
-                </div>
-
-                <div class="input_box">
-                    <input type="text" name="role" class="input-field" id="staffRole" required>
+                    <input type="text" name="role" class="input-field" id="staffRole" value="{{ old('role') }}" required>
                     <label class="label" for="staffRole">Role</label>
                     <i class="icon fas fa-user-tag"></i>
                     @error('role')
@@ -405,7 +463,7 @@
                     <select name="clinic_id" class="input-field" id="staffClinic" required>
                         <option value="" disabled selected>Select Clinic</option>
                         @foreach($clinics as $clinic)
-                            <option value="{{ $clinic->id }}">{{ $clinic->name }}</option>
+                            <option value="{{ $clinic->id }}" {{ old('clinic_id') == $clinic->id ? 'selected' : '' }}>{{ $clinic->name }}</option>
                         @endforeach
                     </select>
                     <i class="icon fas fa-hospital"></i>
@@ -414,11 +472,52 @@
                     @enderror
                 </div>
 
+                <!-- Experience -->
                 <div class="input_box">
-                    <input type="number" name="experience" class="input-field" id="staffExperience" required min="0">
+                    <input type="number" name="experience" class="input-field" id="staffExperience" value="{{ old('experience') }}" required min="0">
                     <label class="label" for="staffExperience">Years of Experience</label>
                     <i class="icon fas fa-briefcase"></i>
                     @error('experience')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Email -->
+                <div class="input_box">
+                    <input type="email" name="email" class="input-field" id="staffEmail" value="{{ old('email') }}" required>
+                    <label class="label" for="staffEmail">Email</label>
+                    <i class="icon fas fa-envelope"></i>
+                    @error('email')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Username -->
+                <div class="input_box">
+                    <input type="text" name="username" class="input-field" id="staffUsername" value="{{ old('username') }}" required>
+                    <label class="label" for="staffUsername">Username</label>
+                    <i class="icon fas fa-user"></i>
+                    @error('username')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Password -->
+                <div class="input_box">
+                    <input type="password" name="password" class="input-field" id="staffPassword" required>
+                    <label class="label" for="staffPassword">Password</label>
+                    <i class="icon fas fa-lock"></i>
+                    @error('password')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Password Confirmation -->
+                <div class="input_box">
+                    <input type="password" name="password_confirmation" class="input-field" id="staffPasswordConfirmation" required>
+                    <label class="label" for="staffPasswordConfirmation">Confirm Password</label>
+                    <i class="icon fas fa-lock"></i>
+                    @error('password_confirmation')
                     <span class="error-message">{{ $message }}</span>
                     @enderror
                 </div>
@@ -591,7 +690,7 @@
 
 
 
-        </div>
+    </div>
 </div>
 
 <script>
@@ -675,37 +774,7 @@
     }
 
 </script>
-<script>
-    // Real-time validation for input fields
-    document.querySelectorAll('.input-field').forEach(input => {
-        input.addEventListener('input', function () {
-            validateInput(this);
-        });
-    });
 
-    function validateInput(input) {
-        let errorSpan = input.nextElementSibling;
-
-        if (input.value.trim() === '') {
-            errorSpan.textContent = `${input.getAttribute('name')} is required`;
-            input.classList.add('input-error');
-        } else if (input.getAttribute('type') === 'email' && !validateEmail(input.value)) {
-            errorSpan.textContent = `Please enter a valid email address`;
-            input.classList.add('input-error');
-        } else if (input.getAttribute('type') === 'number' && input.value < 0) {
-            errorSpan.textContent = `Please enter a positive number`;
-            input.classList.add('input-error');
-        } else {
-            errorSpan.textContent = '';
-            input.classList.remove('input-error');
-        }
-    }
-
-    function validateEmail(email) {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(String(email).toLowerCase());
-    }
-</script>
 
 <style>
     .input-error {

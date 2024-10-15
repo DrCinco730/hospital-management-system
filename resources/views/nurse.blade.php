@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <title>Data Table</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins&display=swap">
+{{--    <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Poppins&amp;display=swap'>--}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/notiflix@3/dist/notiflix-aio-3.2.5.min.js"></script>
     <style>
         /* General Styling */
         * {
@@ -54,6 +57,7 @@
             color: var(--second-color);
             box-shadow: 0px 0px 20px 5px rgba(0, 0, 0, 0.2);
             background-color: rgba(255, 255, 255, 0.1);
+            margin-top: 30px;
         }
 
         .custom-login-header {
@@ -197,22 +201,33 @@
                 <tbody>
                 @foreach($appointments as $appointment)
                     <tr>
-                        <td data-label="ID">{{ $appointment->id }}</td>
-                        <td data-label="Patient Name">{{ $appointment->patient->first_name }} {{ $appointment->patient->last_name }}</td>
-                        <td data-label="Appointment Date">{{ $appointment->appointment_date }}</td>
-                        <td data-label="Start Time">{{ $appointment->timeSlot->start_time }}</td>
-                        <td data-label="Doctor">{{ $appointment->doctor->name }}</td>
+                        <td data-label="ID">{{ $appointment['id'] }}</td>
+                        <td data-label="Patient Name">{{ $appointment['patient']['first_name'] }} {{ $appointment['patient']['last_name'] }}</td>
+                        <td data-label="Appointment Date">{{ $appointment['appointment_date'] }}</td>
+                        <td data-label="Start Time">
+                            @if(isset($appointment->timeSlot->start_time))
+                                {{ $appointment->timeSlot->start_time }}
+                            @endif
+                        </td>
+                        <td data-label="Doctor">
+                            @if(isset($appointment['doctor']['name']))
+                                {{ $appointment['doctor']['name'] }}
+                            @else
+                                N/A
+                            @endif
+                        </td>
                         <td data-label="Visit Type">Visit Doctor</td>
-                        <td data-label="Status">{{ $appointment->status }}</td>
-                        @if($appointment->notes)
-                            <td data-label="Notes">{{ $appointment->notes }}</td>
-                        @else
-                            <td data-label="Notes"></td>
-                        @endif
+                        <td data-label="Status">{{ $appointment['status'] }}</td>
+                        <td data-label="Notes">
+                            @if(isset($appointment['notes']) && $appointment['notes'] !== null)
+                                {{ $appointment['notes'] }}
+                            @endif
+                        </td>
                     </tr>
                 @endforeach
                 </tbody>
             </table>
+
         </div>
     </div>
 </div>

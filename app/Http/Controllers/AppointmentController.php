@@ -59,7 +59,7 @@ class AppointmentController extends Controller
      */
     public function showTimeChoose(Request $request)
     {
-        $user = Auth::user();
+        $user = Auth::guard('web')->user(); // Return the authenticated user
         $doctorId = $request->session()->get('doctor_id');
         $districtId = $user->district_id;
 
@@ -78,7 +78,9 @@ class AppointmentController extends Controller
             ->whereBetween('appointment_date', [$today, $endDate])
             ->get(['appointment_date', 'time_id']);
 
-        $bookedAppointmentsByDate = $appointments->groupBy('appointment_date');
+        $bookedAppointmentsByDate = $appointments->isEmpty() ? [] : $appointments->groupBy('appointment_date');
+
+//        $bookedAppointmentsByDate = $appointments->groupBy('appointment_date');
 
         // Define time frames for severity levels
         $severityTimeFrames = [
@@ -139,6 +141,8 @@ class AppointmentController extends Controller
 
         ksort($availableSlotsByDate);
 
+//        return response()->json($availableSlotsByDate);
+//
         return view('times', ['availableTimes' => $availableSlotsByDate]);
     }
 

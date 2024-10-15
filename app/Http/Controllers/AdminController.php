@@ -84,8 +84,8 @@ class AdminController extends Controller
 
     public function DoctorBooking(int $doctor_id){
         $appointments = Appointment::with(['timeSlot','patient'])->where('doctor_id',$doctor_id)
-        ->get()
-        ->makeHidden(['created_at', 'updated_at', 'deleted_at','doctor_id','time_id' ]);
+            ->get()
+            ->makeHidden(['created_at', 'updated_at', 'deleted_at','doctor_id','time_id' ]);
 
         $appointments->each(function ($i) {
             $i->timeSlot->makeHidden(['end_time','duration','id']);
@@ -133,43 +133,87 @@ class AdminController extends Controller
      */
     public function addDoctor(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'specialty' => 'required|string|max:255',
-            'clinic_id' => 'required|integer|exists:clinics,id',
-            'experience' => 'required|integer|min:0',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'username' => 'required|string|max:255|unique:users,username',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+        try {
+            // Custom validation rules and messages
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'specialty' => 'required|string|max:255',
+                'clinic_id' => 'required|integer|exists:clinics,id',
+                'experience' => 'required|integer|min:0',
+                'email' => 'required|string|email|max:255|unique:users,email',
+                'username' => 'required|string|max:255|unique:users,username',
+                'password' => 'required|string|min:8|confirmed',
+            ], [
+                'name.required' => 'Please enter the doctor\'s name.',
+                'name.max' => 'The doctor\'s name must not exceed 255 characters.',
+                'specialty.required' => 'Please enter a specialty for the doctor.',
+                'specialty.max' => 'The specialty must not exceed 255 characters.',
+                'clinic_id.required' => 'Please select a valid clinic.',
+                'experience.required' => 'Please enter years of experience.',
+                'experience.integer' => 'The experience must be a valid number.',
+                'email.required' => 'Please enter an email address.',
+                'email.email' => 'Please enter a valid email address.',
+                'email.max' => 'The email must not exceed 255 characters.',
+                'email.unique' => 'This email address is already taken.',
+                'username.required' => 'Please enter a username.',
+                'username.max' => 'The username must not exceed 255 characters.',
+                'username.unique' => 'This username is already taken.',
+                'password.required' => 'Please enter a password.',
+                'password.min' => 'The password must be at least 8 characters long.',
+                'password.confirmed' => 'Password confirmation does not match.',
+            ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+            // Handle validation failures
+            if ($validator->fails()) {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+
+            // Check for username/email conflicts
+            if (Login::where('username', $request->username)->exists() ||
+                User::where('email', $request->email)->exists()) {
+                return redirect()->back()->with('error', 'This username or email address is already in use.')->withInput();
+            }
+
+            // Retrieve district population to set doctor limit
+            $districtId = Clinic::where('id', $request->clinic_id)->first()->district_id;
+            $population = District::where('id', $districtId)->first()->population;
+
+            // Define doctor limit based on population
+            $doctorLimit = 3;
+            if ($population > 10000 && $population <= 20000) {
+                $doctorLimit = 6;
+            } elseif ($population > 20000 && $population <= 30000) {
+                $doctorLimit = 10;
+            }
+
+            // Check if clinic doctor count exceeds the limit
+            $clinicDoctorCount = Doctor::where('clinic_id', $request->clinic_id)->count();
+            if ($clinicDoctorCount >= $doctorLimit) {
+                return redirect()->back()->with('error', 'You have exceeded the maximum number of doctors allowed.');
+            }
+
+            // Create new doctor entry with hashed password
+            $doctor = Doctor::create([
+                'name' => $request->name,
+                'specialty' => $request->specialty,
+                'clinic_id' => $request->clinic_id,
+                'experience_years' => $request->experience,
+                'email' => $request->email,
+                'username' => $request->username,
+                'password' => $request->password, // Hash the password
+            ]);
+
+
+
+            // Redirect with success message
+            return redirect()->back()->with('success', 'Doctor has been successfully added!');
+
+        } catch (Exception $e) {
+            // Catch unexpected errors
+            return redirect()->back()->with('error', 'An unexpected error occurred. Please try again later.');
         }
-
-        // Retrieve district ID and population
-        $districtId = Clinic::where('id', $request->clinic_id)->first()->district_id;
-        $population = District::where('id', $districtId)->first()->population;
-
-        // Set doctor limit based on population range
-        $doctorLimit = 3;
-
-        if ($population > 10000 && $population <= 20000) {
-            $doctorLimit = 6;
-        } elseif ($population > 20000 && $population <= 30000) {
-            $doctorLimit = 10;
-        }
-
-        // Check current doctor count in the clinic
-        $clinicDoctorCount = Doctor::where('clinic_id', $request->clinic_id)->count();
-
-        if ($clinicDoctorCount >= $doctorLimit) {
-            return redirect()->back()->with('error', 'You have exceeded the maximum number of doctors allowed.');
-        }
-
-        Doctor::create($request->only(['name', 'specialty', 'clinic_id','email','username','password']) + ['experience_years' => $request->experience]);
-        return redirect()->back()->with('success', 'Doctor has been successfully added!');
     }
+
 
 
     /**
@@ -224,86 +268,191 @@ class AdminController extends Controller
 
     public function addNurse(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'specialty' => 'required|string|max:255',
-            'clinic_id' => 'required|integer|exists:clinics,id',
-            'experience' => 'required|integer|min:0',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'username' => 'required|string|max:255|unique:users,username',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+        try {
+            // Custom validation rules and messages
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'specialty' => 'required|string|max:255',
+                'clinic_id' => 'required|integer|exists:clinics,id',
+                'experience' => 'required|integer|min:0',
+                'email' => 'required|string|email|max:255|unique:users,email',
+                'username' => 'required|string|max:255|unique:users,username',
+                'password' => 'required|string|min:8|confirmed',
+            ], [
+                'name.required' => 'Please enter the nurse\'s name.',
+                'name.max' => 'The nurse\'s name must not exceed 255 characters.',
+                'specialty.required' => 'Please enter a specialty for the nurse.',
+                'specialty.max' => 'The specialty must not exceed 255 characters.',
+                'clinic_id.required' => 'Please select a valid clinic.',
+                'experience.required' => 'Please enter years of experience.',
+                'experience.integer' => 'The experience must be a valid number.',
+                'email.required' => 'Please enter an email address.',
+                'email.email' => 'Please enter a valid email address.',
+                'email.max' => 'The email must not exceed 255 characters.',
+                'email.unique' => 'This email address is already taken.',
+                'username.required' => 'Please enter a username.',
+                'username.max' => 'The username must not exceed 255 characters.',
+                'username.unique' => 'This username is already taken.',
+                'password.required' => 'Please enter a password.',
+                'password.min' => 'The password must be at least 8 characters long.',
+                'password.confirmed' => 'Password confirmation does not match.',
+            ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput()->with('showForm', 'nurseForm');
+            // Handle validation failures
+            if ($validator->fails()) {
+                return redirect()->back()->withErrors($validator)->withInput()->with('showForm', 'nurseForm');
+            }
+
+            // Retrieve district ID and population
+            $districtId = Clinic::find($request->clinic_id)->district_id;
+            $population = District::find($districtId)->population;
+
+            // Set nurse limit based on population range
+            $nurseLimit = 3;
+            if ($population > 10000 && $population <= 20000) {
+                $nurseLimit = 6;
+            } elseif ($population > 20000 && $population <= 30000) {
+                $nurseLimit = 10;
+            } elseif ($population > 30000 ) {
+                $nurseLimit = 10;
+            }
+
+
+            // Check current nurse count in the clinic
+            $clinicNurseCount = Nurse::where('clinic_id', $request->clinic_id)->count();
+            if ($clinicNurseCount >= $nurseLimit) {
+                return redirect()->back()->with('error', 'You have exceeded the maximum number of nurses allowed.')->with('showForm', 'nurseForm');
+            }
+
+            // Create new nurse entry with hashed password
+            Nurse::create([
+                'name' => $request->name,
+                'specialty' => $request->specialty,
+                'clinic_id' => $request->clinic_id,
+                'experience' => $request->experience,
+                'email' => $request->email,
+                'username' => $request->username,
+                'password' => $request->password,
+            ]);
+
+            // Redirect back with success message
+            return redirect()->back()->with('success', 'Nurse created successfully!');
+
+        } catch (Exception $e) {
+            // Handle any unexpected errors
+            return redirect()->back()->with('error', 'An unexpected error occurred. Please try again later.')->with('showForm', 'nurseForm');
         }
-
-        // Retrieve district ID and population
-        $districtId = Clinic::where('id', $request->clinic_id)->first()->district_id;
-        $population = District::where('id', $districtId)->first()->population;
-
-        // Set nurse limit based on population range
-        $nurseLimit = 5;
-
-        if ($population > 10000 && $population <= 20000) {
-            $nurseLimit = 8;
-        } elseif ($population > 20000 && $population <= 30000) {
-            $nurseLimit = 12;
-        }
-
-        // Check current nurse count in the clinic
-        $clinicNurseCount = Nurse::where('clinic_id', $request->clinic_id)->count();
-
-        if ($clinicNurseCount >= $nurseLimit) {
-            return redirect()->back()->with('error', 'You have exceeded the maximum number of nurses allowed.');
-        }
-
-        Nurse::create($request->only(['name', 'specialty', 'clinic_id', 'experience','email','username','password']));
-        return redirect()->back()->with('success', 'Nurse created successfully!');
     }
+
 
 
     public function addGeneralStaff(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'role' => 'required|string|max:255',
-            'clinic_id' => 'required|integer|exists:clinics,id',
-            'experience' => 'required|integer|min:0',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'username' => 'required|string|max:255|unique:users,username',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+        try {
+            // Custom validation rules and messages
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'role' => 'required|string|max:255',
+                'clinic_id' => 'required|integer|exists:clinics,id',
+                'experience' => 'required|integer|min:0',
+                'email' => 'required|string|email|max:255|unique:users,email',
+                'username' => 'required|string|max:255|unique:users,username',
+                'password' => 'required|string|min:8|confirmed',
+            ], [
+                'name.required' => 'Please enter the staff member\'s name.',
+                'name.max' => 'The name must not exceed 255 characters.',
+                'role.required' => 'Please specify the role of the staff member.',
+                'role.max' => 'The role must not exceed 255 characters.',
+                'clinic_id.required' => 'Please select a valid clinic.',
+                'experience.required' => 'Please enter years of experience.',
+                'experience.integer' => 'Experience must be a valid number.',
+                'email.required' => 'Please enter an email address.',
+                'email.email' => 'Please enter a valid email address.',
+                'email.max' => 'The email must not exceed 255 characters.',
+                'email.unique' => 'This email address is already taken.',
+                'username.required' => 'Please enter a username.',
+                'username.max' => 'The username must not exceed 255 characters.',
+                'username.unique' => 'This username is already taken.',
+                'password.required' => 'Please enter a password.',
+                'password.min' => 'The password must be at least 8 characters long.',
+                'password.confirmed' => 'Password confirmation does not match.',
+            ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput()->with('showForm', 'staffForm');
+            // Handle validation failures
+            if ($validator->fails()) {
+                return redirect()->back()->withErrors($validator)->withInput()->with('showForm', 'staffForm');
+            }
+
+            // Retrieve district ID and population
+            $districtId = Clinic::find($request->clinic_id)->district_id;
+            $population = District::find($districtId)->population;
+
+            // Set general staff limit based on population range
+            $staffLimit = 3;
+
+            if ($population > 10000 && $population <= 20000) {
+                $staffLimit = 5;
+            } elseif ($population > 20000 && $population <= 30000) {
+                $staffLimit = 8;
+            } elseif ($population > 30000 ) {
+                $staffLimit = 8;
+            }
+
+            // Check current general staff count in the clinic
+            $clinicStaffCount = GeneralStaff::where('clinic_id', $request->clinic_id)->count();
+            if ($clinicStaffCount >= $staffLimit) {
+                return redirect()->back()->with('error', 'You have exceeded the maximum number of general staff allowed.')->with('showForm', 'staffForm');
+            }
+
+            // Create new general staff entry with hashed password
+            GeneralStaff::create([
+                'name' => $request->name,
+                'role' => $request->role,
+                'clinic_id' => $request->clinic_id,
+                'experience' => $request->experience,
+                'email' => $request->email,
+                'username' => $request->username,
+                'password' => $request->password,
+            ]);
+
+            // Redirect back with success message
+            return redirect()->back()->with('success', 'General staff member created successfully!');
+
+        } catch (Exception $e) {
+            // Handle any unexpected errors
+            return redirect()->back()->with('error', 'An unexpected error occurred. Please try again later.')->with('showForm', 'staffForm');
         }
-
-        // Retrieve district ID and population
-        $districtId = Clinic::where('id', $request->clinic_id)->first()->district_id;
-        $population = District::where('id', $districtId)->first()->population;
-
-        // Set general staff limit based on population range
-        $staffLimit = 3;
-
-        if ($population > 10000 && $population <= 20000) {
-            $staffLimit = 5;
-        } elseif ($population > 20000 && $population <= 30000) {
-            $staffLimit = 8;
-        }
-
-        // Check current general staff count in the clinic
-        $clinicStaffCount = GeneralStaff::where('clinic_id', $request->clinic_id)->count();
-
-        if ($clinicStaffCount >= $staffLimit) {
-            return redirect()->back()->with('error', 'You have exceeded the maximum number of general staff allowed.');
-        }
-
-        GeneralStaff::create($request->only(['name', 'role', 'clinic_id', 'experience','email','username','password']));
-        return redirect()->back()->with('success', 'General Staff created successfully!');
     }
 
+    public function deleteClinic(int $clinicId)
+    {
+        try {
 
+            // Validate the clinic ID to ensure it exists
+            $clinic = Clinic::find($clinicId);
+
+            if (!$clinic) {
+                return redirect()->back()->with('error', 'Clinic not found.');
+            }
+
+            // Soft delete associated doctors, nurses, and general staff
+            Doctor::where('clinic_id', $clinicId)->delete();
+            Nurse::where('clinic_id', $clinicId)->delete();
+            GeneralStaff::where('clinic_id', $clinicId)->delete();
+
+            // Delete appointments associated with doctors in this clinic
+            Appointment::whereIn('doctor_id', Doctor::where('clinic_id', $clinicId)->pluck('id'))->delete();
+
+            // Soft delete the clinic itself
+            $clinic->delete();
+
+            // Return a success message
+            return response()->json('success');
+        } catch (Exception $e) {
+            // Handle any unexpected errors and return an error message
+            return response()->json([]);
+        }
+    }
     public function deleteSome(Request $request)
     {
         try {
@@ -336,35 +485,6 @@ class AdminController extends Controller
         } catch (Exception $e) {
             // Catch any unexpected errors and return an error message
             return redirect()->back()->with('error', 'An unexpected error occurred while trying to delete the staff members.');
-        }
-    }
-    public function deleteClinic(int $clinicId)
-    {
-        try {
-
-            // Validate the clinic ID to ensure it exists
-            $clinic = Clinic::find($clinicId);
-
-            if (!$clinic) {
-                return redirect()->back()->with('error', 'Clinic not found.');
-            }
-
-            // Soft delete associated doctors, nurses, and general staff
-            Doctor::where('clinic_id', $clinicId)->delete();
-            Nurse::where('clinic_id', $clinicId)->delete();
-            GeneralStaff::where('clinic_id', $clinicId)->delete();
-
-            // Delete appointments associated with doctors in this clinic
-            Appointment::whereIn('doctor_id', Doctor::where('clinic_id', $clinicId)->pluck('id'))->delete();
-
-            // Soft delete the clinic itself
-            $clinic->delete();
-
-            // Return a success message
-            return response()->json('success');
-        } catch (Exception $e) {
-            // Handle any unexpected errors and return an error message
-            return response()->json([]);
         }
     }
 }

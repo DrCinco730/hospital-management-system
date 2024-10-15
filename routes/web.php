@@ -40,7 +40,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/home', fn () => view('home'))->name('home'); // Name the route for easier referencing
     Route::post("/bookslot",[AppointmentController::class,'bookSlot'])->name('book.slot');
-    Route::post('/showTimes', [AppointmentController::class, 'showTimeChoose'])->name('showTimes');
+    Route::get('/showTimes', [AppointmentController::class, 'showTimeChoose'])->name('showTimes');
 
     Route::get("/times",function(){return view("times");})->name('times');
     Route::get('/book-appointment', [AppointmentController::class, 'showBookingForm'])->name('appointment.form'); // Show booking form
@@ -58,7 +58,6 @@ Route::middleware('auth')->group(function () {
 Route::group(['middleware' => ['auth:admin']], function () {
     Route::get('/admin', [AdminController::class, 'showAdmin'])->name('admin');
     Route::post('/add-clinic', [AdminController::class, 'addClinic'])->name('add-clinic');
-    Route::post('/add-doctor', [AdminController::class, 'addDoctor'])->name('add-doctor');
     Route::post('/add-admin', [AdminController::class, 'addAdmin'])->name('add-admin');
     Route::post("/add-nurse", [AdminController::class, 'addNurse'])->name('add-nurse');
     Route::post("/add-staff", [AdminController::class, 'addGeneralStaff'])->name('add-staff');
@@ -70,6 +69,7 @@ Route::group(['middleware' => ['auth:admin']], function () {
 
 
 });
+Route::post('/add-doctor', [AdminController::class, 'addDoctor'])->name('add-doctor');
 
 Route::group(['middleware' => ['auth:doctor']], function () {
     Route::get("/doctor",[DoctorContoller::class,'showPatient'])->name("doctor");
@@ -81,7 +81,7 @@ Route::group(['middleware' => ['auth:nurse']], function () {
 });
 
 Route::group(['middleware' => ['auth:general_staff']], function () {
-    Route::get("/nurse",[NurseController::class,'showPatient'])->name("nurse");
+    Route::get("/staff",[NurseController::class,'showPatient'])->name("nurse");
 });
 
 Route::get('/account_created',function(){return view("AccountCreated");})->name('account_created');

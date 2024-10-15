@@ -356,17 +356,17 @@ table tbody tr:hover {
     gap: 20px;
     justify-content: center;
     padding: 30px;
-    align-items: flex-start;
-    /* لضمان محاذاة البطاقات للأعلى */
+    align-items: flex-start; /* لضمان محاذاة البطاقات للأعلى */
 }
+
 
 /* Clinic Card Styling */
 .clinic-card {
-    flex: 1 1 180px;
+    flex: 1 1 190px;
     /* تقليل الحد الأدنى للعرض إلى 180 بكسل بدلاً من 250 */
     max-width: 220px;
     /* تقليل الحد الأقصى للعرض إلى 220 بكسل بدلاً من 300 */
-    min-height: 250px;
+    min-height: 270px;
     /* تقليل الحد الأدنى للارتفاع إلى 250 بكسل بدلاً من 350 */
     border-radius: 15px;
     background: linear-gradient(145deg, #ffffff, #f9f9f9);
