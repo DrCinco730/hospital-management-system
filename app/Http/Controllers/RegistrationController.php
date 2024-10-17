@@ -1,14 +1,14 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Models\Otp;
-use App\Services\OtpService;
-use App\Services\UserService;
 use App\Models\City;
-use Illuminate\Http\Request;
+use App\Models\Otp;
+use App\Services\Signup\OtpService;
+use App\Services\Signup\UserService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\View\View;
 use Random\RandomException;
 
 class RegistrationController extends Controller

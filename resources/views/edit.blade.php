@@ -1,5 +1,5 @@
 <!-- Staff Container Styling -->
-    <form action="{{ route('deleteSomething') }}" method="POST" id="deleteForm">
+    <form action="{{ route('delete-some') }}" method="POST" id="deleteForm">
         @csrf
         @foreach($clinics as $clinic)
             <!-- Clinic Header -->

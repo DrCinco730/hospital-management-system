@@ -1,12 +1,12 @@
 <?php
 
 
-namespace App\Services;
+namespace App\Services\Login;
 
+use App\Models\Admin;
 use App\Models\Doctor;
 use App\Models\GeneralStaff;
 use App\Models\Login;
-use App\Models\Admin;
 use App\Models\Nurse;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;

@@ -54,22 +54,51 @@ Route::middleware('auth')->group(function () {
 
 });
 
-//Route::get('/admin', [AdminController::class, 'showAdmin'])->name('admin')->middleware("auth:admin");
+//Route::group(['middleware' => ['auth:admin']], function () {
+//    Route::get('/admin', [AdminController::class, 'showAdmin'])->name('admin');
+//    Route::get("/showClinicDetails/{clinic_id}/{page}", [AdminController::class, 'clinicDetails']);
+//    Route::post('/add-clinic', [AdminController::class, 'addClinic'])->name('add-clinic');
+//    Route::get("/deleteClinic/{clinicID}", [AdminController::class, 'deleteClinic'])->name('deleteClinic');
+//    Route::post('/add-admin', [AdminController::class, 'addAdmin'])->name('add-admin');
+//    Route::post("/add-nurse", [AdminController::class, 'addNurse'])->name('add-nurse');
+//    Route::post("/add-staff", [AdminController::class, 'addGeneralStaff'])->name('add-staff');
+//    Route::post('/add-doctor', [AdminController::class, 'addDoctor'])->name('add-doctor');
+//    Route::get("/showDoctorDetails", [AdminController::class, 'showDoctor']);
+//    Route::get("/doctorBooking/{doctor_id}", [AdminController::class, 'DoctorBooking'])->name('doctorBooking');
+//    Route::post("/deleteSomething", [AdminController::class, 'deleteSome'])->name('deleteSomething');
+//
+//});
+
+
 Route::group(['middleware' => ['auth:admin']], function () {
+    // Admin Dashboard
     Route::get('/admin', [AdminController::class, 'showAdmin'])->name('admin');
-    Route::post('/add-clinic', [AdminController::class, 'addClinic'])->name('add-clinic');
+
+    // Clinic-related Routes
+    Route::prefix('clinic')->group(function () {
+        Route::post('/add', [AdminController::class, 'addClinic'])->name('clinic/add');
+        Route::get('/{clinic_id}/details/{page?}', [AdminController::class, 'ClinicDetails'])->name('clinic.details')
+            ->where('clinic_id', '[0-9]+'); // Ensure clinic_id is numeric
+        Route::get('/{clinicID}/delete', [AdminController::class, 'deleteClinic'])->name('deleteClinic')
+            ->where('clinicID', '[0-9]+'); // Ensure clinicID is numeric
+    });
+
+    // Doctor-related Routes
+    Route::prefix('doctor')->group(function () {
+        Route::post('/add', [AdminController::class, 'addDoctor'])->name('doctor/add');
+        Route::get('/details', [AdminController::class, 'showDoctor'])->name('doctor.details');
+        Route::get('/{doctor_id}/booking', [AdminController::class, 'DoctorBooking'])->name('doctorBooking')
+            ->where('doctor_id', '[0-9]+'); // Ensure doctor_id is numeric
+    });
+
+    // Other staff and management routes
     Route::post('/add-admin', [AdminController::class, 'addAdmin'])->name('add-admin');
-    Route::post("/add-nurse", [AdminController::class, 'addNurse'])->name('add-nurse');
-    Route::post("/add-staff", [AdminController::class, 'addGeneralStaff'])->name('add-staff');
-    Route::get("/showClinicDetails/{clinic_id}/{page}", [AdminController::class, 'ClinicDetails']);
-    Route::get("/showDoctorDetails", [AdminController::class, 'showDoctor']);
-    Route::get("/doctorBooking/{doctor_id}", [AdminController::class, 'DoctorBooking'])->name('doctorBooking');
-    Route::post("/deleteSomething", [AdminController::class, 'deleteSome'])->name('deleteSomething');
-    Route::get("/deleteClinic/{clinicID}", [AdminController::class, 'deleteClinic'])->name('deleteClinic');
+    Route::post('/add-nurse', [AdminController::class, 'addNurse'])->name('add-nurse');
+    Route::post('/add-staff', [AdminController::class, 'addGeneralStaff'])->name('add-staff');
 
-
+    // Bulk delete route
+    Route::post('/delete-some', [AdminController::class, 'deleteSome'])->name('delete-some');
 });
-Route::post('/add-doctor', [AdminController::class, 'addDoctor'])->name('add-doctor');
 
 Route::group(['middleware' => ['auth:doctor']], function () {
     Route::get("/doctor",[DoctorContoller::class,'showPatient'])->name("doctor");

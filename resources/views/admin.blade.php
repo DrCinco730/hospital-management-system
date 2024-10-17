@@ -94,7 +94,7 @@
         {{--        </div>--}}
 
         <div id="clinicForm" class="content-section" style="display: none;">
-            <form class="form-container" method="post" action="{{ route('add-clinic') }}">
+            <form class="form-container" method="post" action="{{ route('clinic/add') }}">
                 @csrf <!-- Adding CSRF token for security -->
 
                 <div class="input_box">
@@ -231,7 +231,7 @@
 
         <!-- Add Doctor Form -->
         <div id="doctorForm" class="content-section" style="display: none;">
-            <form class="form-container" method="post" action="{{ route('add-doctor') }}">
+            <form class="form-container" method="post" action="{{ route('doctor/add') }}">
                 @csrf
 
                 <!-- Doctor Name -->
@@ -751,7 +751,7 @@
     function deleteClinic(clinicName, clinicId) {
         if (confirm(`Are you sure you want to delete ${clinicName}?`)) {
             $.ajax({
-                url: `/deleteClinic/${clinicId}`, // Make sure this route exists in your routes file
+                url: `/clinic/${clinicId}/delete`, // Make sure this route exists in your routes file
                 type: 'GET', // Use the DELETE HTTP method
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // CSRF token for security
@@ -928,9 +928,9 @@
 
             if (targetId === 'doctorBook') {
                 loadDoctorBooking();
-            } else if ($(this).hasClass('edit-button')) {
-                const clinicId = $(this).data('clinic-id');
-                loadEditClinicForm(clinicId);
+            // } else if ($(this).hasClass('edit-button')) {
+            //     const clinicId = $(this).data('clinic-id');
+            //     loadEditClinicForm(clinicId);
             } else if ($(this).hasClass('show-info-button')) {
                 const clinicId = $(this).data('clinic-id');
                 loadClinicInfo(clinicId);
@@ -938,7 +938,7 @@
         });
 
         function loadDoctorBooking() {
-            $.get('/showDoctorDetails', function(response) {
+            $.get('/doctor/details', function(response) {
                 $('#showClinicDetails').html(response).show();
                 showForm('showClinicDetails', 'Doctor Booking');
             }).fail(function() {
@@ -946,17 +946,17 @@
             });
         }
 
-        function loadEditClinicForm(clinicId) {
-            $.get(`/showClinicDetails/${clinicId}/edit`, function(response) {
-                $('#editClinicForm').html(response).show();
-                showForm('editClinicForm', 'Edit Clinic Staff');
-            }).fail(function() {
-                alert('Error loading clinic details.');
-            });
-        }
+        // function loadEditClinicForm(clinicId) {
+        //     $.get(`/clinic/${clinicId}/details/edit`, function(response) {
+        //         $('#editClinicForm').html(response).show();
+        //         showForm('editClinicForm', 'Edit Clinic Staff');
+        //     }).fail(function() {
+        //         alert('Error loading clinic details.');
+        //     });
+        // }
 
         function loadClinicInfo(clinicId) {
-            $.get(`/showClinicDetails/${clinicId}/show`, function(response) {
+            $.get(`/clinic/${clinicId}/details/clinic`, function(response) {
                 $('#showClinicDetails').html(response).show();
                 showForm('showClinicDetails', 'Clinic Staff Overview');
             }).fail(function() {
@@ -980,7 +980,7 @@
 
             // Make the AJAX GET request, including the clinic_id in the URL
             $.ajax({
-                url: `/doctorBooking/${clinicId}`, // dynamically add clinic_id here
+                url: `/doctor/${clinicId}/booking`, // dynamically add clinic_id here
                 type: 'GET',
                 success: function(response) {
                     // Load the returned HTML into the editClinicForm section

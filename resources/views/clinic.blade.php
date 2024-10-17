@@ -19,7 +19,7 @@
             <!-- Placeholder for Appointments -->
             <div class="clinic-overview-info-card">
                 <i class="fas fa-calendar-check"></i>
-                <div class="clinic-overview-info-text">Appointments: <span>{{$counts}}</span></div> <!-- Adjust as needed -->
+                <div class="clinic-overview-info-text">Appointments: <span>{{$appointmentsCount}}</span></div> <!-- Adjust as needed -->
             </div>
         </div>
 

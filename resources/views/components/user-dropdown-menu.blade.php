@@ -1,24 +1,3 @@
-{{--<!-- قائمة المستخدم المنسدلة -->--}}
-{{--<div class="user-menu">--}}
-{{--    <div class="user-profile" onclick="toggleDropdown()">--}}
-{{--        <!-- أيقونة المستخدم -->--}}
-{{--        <i class="fas fa-user-circle user-icon"></i>--}}
-{{--    </div>--}}
-{{--    <!-- القائمة المنسدلة -->--}}
-{{--    <div id="dropdown-menu" class="dropdown-menu">--}}
-{{--        <div class="user-info">--}}
-{{--            <i class="fas fa-user-circle user-icon-large"></i>--}}
-{{--            <div>--}}
-{{--                <span class="user-name">{{ $name }}</span>--}}
-{{--                <span class="user-email">{{ $email }}</span>--}}
-{{--            </div>--}}
-{{--        </div>--}}
-{{--        <div class="dropdown-options">--}}
-{{--            <a href="#" class="dropdown-option">Account Settings</a>--}}
-{{--            <a href="#" class="dropdown-option logout" onclick="goToLogout()">Log Out</a>--}}
-{{--        </div>--}}
-{{--    </div>--}}
-{{--</div>--}}
 <div class="user-menu">
     <div class="user-profile" onclick="toggleDropdown()">
         <!-- أيقونة المستخدم -->
@@ -41,6 +20,13 @@
         </div>
     </div>
 </div>
+
+<!-- روابط المكتبات CSS -->
+<link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Poppins&amp;display=swap'>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<!-- روابط المكتبات JS -->
+<script src="https://cdn.jsdelivr.net/npm/notiflix@3/dist/notiflix-aio-3.2.5.min.js"></script>
 
 <style>
 

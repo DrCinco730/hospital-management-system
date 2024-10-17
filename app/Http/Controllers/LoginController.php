@@ -3,13 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Login;
-use App\Services\LoginService;
+use App\Services\Login\LoginService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Routing\Controller;
-use Illuminate\View\View;
 
 class LoginController extends Controller
 {

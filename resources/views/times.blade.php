@@ -20,7 +20,7 @@
     </style>
 </head>
 <body>
-
+<x-user-dropdown-menu/>
 <div class="wrapper">
     <div class="calendar_box">
         <div class="calendar-header">

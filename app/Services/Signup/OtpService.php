@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Signup;
 
+use App\Mail\OtpMail;
 use App\Models\Otp;
+use App\Services\Mail\MailerService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\OtpMail;
 use Random\RandomException;
 
 class OtpService

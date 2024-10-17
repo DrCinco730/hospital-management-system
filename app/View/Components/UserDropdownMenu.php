@@ -3,7 +3,7 @@
 namespace App\View\Components;
 
 use AllowDynamicProperties;
-use App\Services\LoginService;
+use App\Services\Login\LoginService;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
