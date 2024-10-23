@@ -24,8 +24,10 @@ class AppointmentController extends Controller
      */
     public function showBookingForm(): View
     {
-        $this->checkAppointment();
-
+        $appointmentDetails = $this->checkAppointment();
+        if($appointmentDetails) {
+            return view('AppointmentDetails', compact('appointmentDetails'));
+        }
 
 
 //
@@ -41,8 +43,10 @@ class AppointmentController extends Controller
      */
     public function showTimeChoose(Request $request)
     {
-        $this->checkAppointment();
-
+        $appointmentDetails = $this->checkAppointment();
+        if($appointmentDetails) {
+            return view('AppointmentDetails', compact('appointmentDetails'));
+        }
         $user = Auth::guard('web')->user(); // Return the authenticated user
         $doctorId = $request->session()->get('doctor_id');
         $districtId = $user->district_id;
@@ -134,8 +138,10 @@ class AppointmentController extends Controller
      */
     public function bookSlot(Request $request): RedirectResponse
     {
-        $this->checkAppointment();
-        $validatedData = $request->validate([
+        $appointmentDetails = $this->checkAppointment();
+        if($appointmentDetails) {
+            return view('AppointmentDetails', compact('appointmentDetails'));
+        }        $validatedData = $request->validate([
             'time_slot' => 'required|integer|exists:time_slots,id',
             'appointment_date' => 'required|date|after_or_equal:today',
         ], [
@@ -166,8 +172,10 @@ class AppointmentController extends Controller
      */
     public function storePatientSymptoms(Request $request)
     {
-        $this->checkAppointment();
-
+        $appointmentDetails = $this->checkAppointment();
+        if($appointmentDetails) {
+            return view('AppointmentDetails', compact('appointmentDetails'));
+        }
 
         $validatedData = $request->validate([
             'symptoms_list' => 'required|json',
@@ -254,8 +262,11 @@ class AppointmentController extends Controller
      */
     public function showClinic()
     {
-        $this->checkAppointment();
-            $clinics = Clinic::with('city', 'district')->get()->makeHidden(['created_at', 'updated_at']);
+        $appointmentDetails = $this->checkAppointment();
+        if($appointmentDetails) {
+            return view('AppointmentDetails', compact('appointmentDetails'));
+        }
+        $clinics = Clinic::with('city', 'district')->get()->makeHidden(['created_at', 'updated_at']);
 
             return view("clinic-selection", ['clinics' => $clinics]);
     }
@@ -265,7 +276,10 @@ class AppointmentController extends Controller
      */
     public function showDoctor($clinicId)
     {
-        $this->checkAppointment();
+        $appointmentDetails = $this->checkAppointment();
+        if($appointmentDetails) {
+            return view('AppointmentDetails', compact('appointmentDetails'));
+        }
         $doctors = Doctor::withoutTrashed()
             ->where('clinic_id', $clinicId)
             ->get()
@@ -288,26 +302,28 @@ class AppointmentController extends Controller
     public function checkAppointment()
     {
         $this->updateData();
-
-        $doctorId = session()->get('doctor_id');
         $user = Auth::user();
 
-        $appointmentDetails = Appointment::where('status', 'Pending')
+        $appointmentDetails = Appointment::with(['doctor.clinic'])->where('status', 'Pending')
             ->where('patient_id', $user->id)
-            ->where('doctor_id', $doctorId)
             ->with('timeSlot')
             ->get()
             ->map(function ($appointment) {
                 return [
                     'appointment_date' => $appointment->appointment_date,
                     'start_time' => $appointment->timeSlot ? $appointment->timeSlot->start_time : null,
+                    'doctor' => $appointment->doctor->name,
+                    'clinic' => $appointment->doctor->clinic->name,
                 ];
-            })->first();
+            }
+            )
+        ->first();
         if ($appointmentDetails) {
             $symptoms = PatientSymptom::where('user_id', $user->id)->pluck('symptoms');
             $appointmentDetails['symptoms'] = $symptoms->isNotEmpty() ? json_decode($symptoms[0], true) : [];
+            return $appointmentDetails;
 
-            return view('AppointmentDetails', compact('appointmentDetails'));
+//            return response()->json($appointmentDetails);
         }
     }
 }

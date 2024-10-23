@@ -24,6 +24,8 @@
     <div class="appointment-box">
         <h2>Appointment Details</h2>
         <div class="appointment-details">
+            <p><span>Clinic Name:</span> {{ $appointmentDetails['clinic'] }}</p>
+            <p><span>Doctor Name:</span> {{ $appointmentDetails['doctor'] }}</p>
             <p><span>Appointment Date:</span> {{ $appointmentDetails['appointment_date'] }}</p>
             <p><span>Start Time:</span> {{ $appointmentDetails['start_time'] }}</p>
             <p><span>Symptoms:</span></p>
