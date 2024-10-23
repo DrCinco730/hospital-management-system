@@ -70,7 +70,7 @@
         background: linear-gradient(135deg, #ffffff, #f0f0f0);
         border-radius: 12px;
         box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.2);
-        width: 310px;
+        width: 270px;
         display: none;
         flex-direction: column;
         padding: 20px;
@@ -98,18 +98,18 @@
     /* تحسين حجم الخطوص والألوان */
     .user-name {
         font-weight: bold;
-        font-size: 18px;
+        font-size: 16px;
         color: #333;
     }
 
     .user-email {
-        font-size: 14px;
+        font-size: 13px;
         color: #666;
     }
 
     /* الأيقونة الكبيرة داخل القائمة */
     .user-icon-large {
-        font-size: 30px;
+        font-size: 28px;
         color: #ffffff;
         margin-right: 10px;
         background-color: #444;
