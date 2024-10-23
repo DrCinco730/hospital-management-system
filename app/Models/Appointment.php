@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Appointment extends Model
 {
-    use SoftDeletes,HasFactory;
+    use HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -22,10 +22,10 @@ class Appointment extends Model
         'time_id',
         'appointment_date',
         'status',
+        'appointment_type',
         'notes',
     ];
 
-    protected array $dates = ['deleted_at'];
 
 
     /**

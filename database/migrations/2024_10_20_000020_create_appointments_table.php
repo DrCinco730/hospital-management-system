@@ -14,6 +14,9 @@ return new class extends Migration
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
 
+
+//            $table->enum('appointment_type',);
+
             // Foreign Keys
             $table->foreignId('patient_id')
                 ->constrained('users')
@@ -42,7 +45,6 @@ return new class extends Migration
 
             // Timestamps and Soft Deletes
             $table->timestamps();
-            $table->softDeletes();
 
             // Indexes for frequently queried columns
             $table->index('appointment_date');

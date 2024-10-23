@@ -29,8 +29,7 @@ class AppointmentController extends Controller
         $doctorId = session()->get('doctor_id');
         $user = Auth::user();
 
-        $appointmentDetails = Appointment::withoutTrashed()
-            ->where('status', 'Pending')
+        $appointmentDetails = Appointment::where('status', 'Pending')
             ->where('patient_id', $user->id)
             ->where('doctor_id', $doctorId)
             ->with('timeSlot')
@@ -71,8 +70,7 @@ class AppointmentController extends Controller
         $today = Carbon::today();
         $endDate = $today->copy()->addMonth();
 
-        $appointments = Appointment::withoutTrashed()
-            ->where('doctor_id', $doctorId)
+        $appointments = Appointment::where('doctor_id', $doctorId)
             ->whereNot('status', 'Cancelled')
             ->whereNot('status', 'Done')
             ->whereBetween('appointment_date', [$today, $endDate])
@@ -222,12 +220,10 @@ class AppointmentController extends Controller
         $currentTime = $now->toTimeString();
 
         Appointment::where('appointment_date', '<', $todayDate)
-            ->whereNull('deleted_at')
             ->where('status', '!=', 'done')
-            ->update(['status' => 'done', 'deleted_at' => Carbon::now()]);
+            ->delete();
 
         $todaysAppointments = Appointment::where('appointment_date', '=', $todayDate)
-            ->whereNull('deleted_at')
             ->where('status', '!=', 'done')
             ->get();
 
@@ -235,7 +231,7 @@ class AppointmentController extends Controller
             $timeSlot = TimeSlot::find($appointment->time_id);
 
             if ($timeSlot && $timeSlot->end_time <= $currentTime) {
-                $appointment->update(['status' => 'done', 'deleted_at' => Carbon::now()]);
+                $appointment->delete();
             }
         }
     }
@@ -253,8 +249,7 @@ class AppointmentController extends Controller
             ->where('doctor_id', $doctorId)
             ->whereNot('status', 'cancelled')
             ->whereNot('status', 'Done')
-            ->whereNull('deleted_at')
-            ->update(['status' => 'Cancelled', 'deleted_at' => now()]);
+            ->delete();
 
         if ($appointment) {
             PatientSymptom::where('user_id', $user->id)->delete();

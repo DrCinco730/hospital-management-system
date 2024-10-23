@@ -14,7 +14,7 @@
         <tr>
             <td>{{ $key + 1 }}</td>
             <td>{{ $appointment['patient']['first_name'] }} {{ $appointment['patient']['last_name'] }}</td>
-            <td>Dr. Smith</td> <!-- Assuming you want to dynamically add the doctor name later -->
+            <td>{{$appointment->doctor->name}}</td> <!-- Assuming you want to dynamically add the doctor name later -->
             <td>{{ $appointment->appointment_date}}</td>
             <td>{{ $appointment->timeSlot->start_time}}</td>
             <td>{{ $appointment['status'] }}</td>

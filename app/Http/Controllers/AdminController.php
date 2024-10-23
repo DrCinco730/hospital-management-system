@@ -83,13 +83,17 @@ class AdminController extends Controller
     }
 
     public function DoctorBooking(int $doctor_id){
-        $appointments = Appointment::with(['timeSlot','patient'])->where('doctor_id',$doctor_id)
+        $appointments = Appointment::with(['timeSlot', 'patient', 'doctor' => function($query) {
+            $query->withTrashed(); // Include soft-deleted doctors
+        }])
+            ->where('doctor_id', $doctor_id)
             ->get()
-            ->makeHidden(['created_at', 'updated_at', 'deleted_at','doctor_id','time_id' ]);
+            ->makeHidden(['created_at', 'updated_at', 'deleted_at', 'doctor_id', 'patient_id' ,'time_id']);
 
         $appointments->each(function ($i) {
             $i->timeSlot->makeHidden(['end_time','duration','id']);
             $i->patient->makeHidden(['created_at', 'updated_at', 'deleted_at','clinic_id','email','username','city_id','district_id','id_number','date_of_birth']);
+            $i->doctor->makeHidden(['created_at', 'updated_at', 'deleted_at','clinic_id','email','experience_years','username','id','specialty']);
 
         });
 //        return response()->json($appointments);
