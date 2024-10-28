@@ -10,6 +10,7 @@ use App\Models\Doctor;
 use App\Models\District;
 use App\Models\GeneralStaff;
 use App\Models\Nurse;
+use App\Models\Specialty;
 use App\Models\User;
 use App\Models\Login;
 use Exception;
@@ -33,10 +34,12 @@ class AdminController extends Controller
 
         $doctors = Doctor::with('clinic')->withoutTrashed()->get();
 
-//        return response()->json($clinics);
-//
+        $doctors_specialties = Specialty::all()->makeHidden(['created_at', 'updated_at']);
+
+//        return response()->json($doctors_specialties);
+
 //         Return view with cities, clinics, and users data
-        return view('admin', compact('cities', 'clinics', 'users','doctors'))
+        return view('admin', compact('cities', 'clinics', 'users','doctors','doctors_specialties'))
             ->with('success', 'You have successfully logged in.');
     }
 

@@ -286,8 +286,14 @@
 
                 <!-- Specialty -->
                 <div class="input_box">
-                    <input type="text" name="specialty" class="input-field" id="doctorSpecialty" value="{{ old('specialty') }}" required>
-                    <label class="label" for="doctorSpecialty">Specialty</label>
+                    <select name="specialty" class="input-field" id="doctorSpecialty" required>
+                        <option value="" disabled selected>Select Specialty</option>
+{{--                    <input type="text" name="specialty" class="input-field" id="doctorSpecialty" value="{{ old('specialty') }}" required>--}}
+{{--                    <label class="label" for="doctorSpecialty">Specialty</label>--}}
+                        @foreach($doctors_specialties as $specialty)
+                            <option value="{{ $specialty->name }}" {{ old('specialty')  == $specialty->name ? 'selected' : '' }}>{{ $specialty->name }}</option>
+                        @endforeach
+                    </select>
                     <i class="icon fas fa-stethoscope"></i>
                     @error('specialty')
                     <span class="error-message">{{ $message }}</span>
@@ -928,9 +934,9 @@
 
             if (targetId === 'doctorBook') {
                 loadDoctorBooking();
-            // } else if ($(this).hasClass('edit-button')) {
-            //     const clinicId = $(this).data('clinic-id');
-            //     loadEditClinicForm(clinicId);
+            } else if ($(this).hasClass('edit-button')) {
+                const clinicId = $(this).data('clinic-id');
+                loadEditClinicForm(clinicId);
             } else if ($(this).hasClass('show-info-button')) {
                 const clinicId = $(this).data('clinic-id');
                 loadClinicInfo(clinicId);
@@ -946,14 +952,14 @@
             });
         }
 
-        // function loadEditClinicForm(clinicId) {
-        //     $.get(`/clinic/${clinicId}/details/edit`, function(response) {
-        //         $('#editClinicForm').html(response).show();
-        //         showForm('editClinicForm', 'Edit Clinic Staff');
-        //     }).fail(function() {
-        //         alert('Error loading clinic details.');
-        //     });
-        // }
+        function loadEditClinicForm(clinicId) {
+            $.get(`/clinic/${clinicId}/details/edit`, function(response) {
+                $('#editClinicForm').html(response).show();
+                showForm('editClinicForm', 'Edit Clinic Staff');
+            }).fail(function() {
+                alert('Error loading clinic details.');
+            });
+        }
 
         function loadClinicInfo(clinicId) {
             $.get(`/clinic/${clinicId}/details/clinic`, function(response) {
