@@ -19,7 +19,7 @@ class DoctorFactory extends Factory
             'name' => $this->faker->name,
             'specialty' => $this->faker->randomElement(['Cardiology', 'Neurology', 'Pediatrics', 'Dermatology']), // التخصص الطبي
             'clinic_id' => $clinic->id,
-            'experience_years' => $this->faker->numberBetween(1, 30),
+            'experience' => $this->faker->numberBetween(1, 30),
             'email' => $this->faker->unique()->safeEmail,
             'username' => $this->faker->unique()->userName,
             'password' => '12345678',

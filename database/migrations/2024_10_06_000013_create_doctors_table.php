@@ -12,13 +12,14 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('specialty');
+            $table->foreign('specialty')->references('name')->on('specialties')->onDelete('restrict');
             $table->foreignId('clinic_id')->constrained('clinics')->onDelete('cascade');
             $table->string('username')->unique(); // Unique username
             $table->string('email')->unique(); // Unique email address
             $table->string('password'); // Password (hashed)
             $table->rememberToken();
 
-            $table->integer('experience_years');
+            $table->integer('experience');
             $table->softDeletes(); // Adds deleted_at column for soft deletes
         });
     }

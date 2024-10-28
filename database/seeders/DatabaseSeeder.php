@@ -14,8 +14,9 @@ use Illuminate\Database\Seeder;
 class DatabaseSeeder extends Seeder
 {
 
-    public function run()
+    public function run(): void
     {
+        $this->call(SpecialtySeeder::class);
         $this->call(CitySeeder::class);
         $this->call(DistrictSeeder::class);
         $this->call(SymptomSeeder::class);

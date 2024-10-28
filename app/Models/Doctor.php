@@ -18,7 +18,7 @@ class Doctor extends Authenticatable
         'name',
         'specialty',
         'clinic_id',
-        'experience_years',
+        'experience',
         'email',
         'username',
         'password',
@@ -75,6 +75,11 @@ class Doctor extends Authenticatable
     public function setPasswordAttribute(string $value): void
     {
         $this->attributes['password'] = bcrypt($value);
+    }
+
+    public function specialty_name(): BelongsTo
+    {
+        return $this->belongsTo(Specialty::class, 'specialty', 'name');
     }
 
 }

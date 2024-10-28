@@ -21,7 +21,7 @@ class DoctorContoller
 
         $appointments->each(function ($appointment) {
             // Hide unnecessary doctor information
-            $appointment->doctor->makeHidden(['created_at', 'updated_at', 'deleted_at', 'clinic_id', 'id', 'specialty', 'experience_years', 'email', 'username']);
+            $appointment->doctor->makeHidden(['created_at', 'updated_at', 'deleted_at', 'clinic_id', 'id', 'specialty', 'experience', 'email', 'username']);
 
             // Hide unnecessary timeSlot information
             $appointment->timeSlot->makeHidden(['id', 'duration', 'end_time']);

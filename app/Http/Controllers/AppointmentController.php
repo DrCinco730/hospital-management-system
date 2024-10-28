@@ -239,11 +239,11 @@ class AppointmentController extends Controller
     public function cancelAppointment()
     {
         $user = Auth::user();
-        $doctorId = session()->get('doctor_id');
+//        $doctorId = session()->get('doctor_id');
 
 
         $appointment = Appointment::where('patient_id', $user->id)
-            ->where('doctor_id', $doctorId)
+//            ->where('doctor_id', $doctorId)
             ->whereNot('status', 'cancelled')
             ->whereNot('status', 'Done')
             ->delete();
@@ -274,7 +274,7 @@ class AppointmentController extends Controller
     /**
      * Show doctors in a clinic.
      */
-    public function showDoctor($clinicId)
+    public function showDoctor($clinicId,$type='normal')
     {
         $appointmentDetails = $this->checkAppointment();
         if($appointmentDetails) {
@@ -282,6 +282,7 @@ class AppointmentController extends Controller
         }
         $doctors = Doctor::withoutTrashed()
             ->where('clinic_id', $clinicId)
+            ->where('type',$type)
             ->get()
             ->makeHidden(['created_at', 'updated_at', 'deleted_at']);
 

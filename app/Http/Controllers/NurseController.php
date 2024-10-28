@@ -15,7 +15,7 @@ class NurseController
 
 //        $appointments->each(function ($appointment) {
 //            $appointment->doctor
-//                ->makeHidden(['created_at', 'updated_at', 'deleted_at', 'clinic_id','id','specialty','experience_years','email','username']);
+//                ->makeHidden(['created_at', 'updated_at', 'deleted_at', 'clinic_id','id','specialty','experience','email','username']);
 //            $appointment->timeSlot->makeHidden(['id','duration','end_time']);
 //            $appointment->patient->makeHidden(['created_at', 'updated_at', 'deleted_at','city_id','district_id','email','username','date_of_birth','id_number','id']);
 //        });
