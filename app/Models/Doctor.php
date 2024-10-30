@@ -38,7 +38,7 @@ class Doctor extends Authenticatable
         static::created(function ($doctor) {
             // List of working days
             if($doctor->specialty === 'Vaccination Specialist') {
-                $workingDays = ['Tuesday', 'Thursday'];
+                $workingDays = ['Tuesday'];
 
                 // Work hours
                 $startTime = '08:00:00';
@@ -53,7 +53,24 @@ class Doctor extends Authenticatable
                         'end_time' => $endTime,
                     ]);
                 }
-            } else {
+            } elseif ($doctor->specialty === 'Clinic Specialist') {
+                $workingDays = ['Thursday'];
+
+                // Work hours
+                $startTime = '08:00:00';
+                $endTime = '17:00:00';
+
+                // Create slots for each working day
+                foreach ($workingDays as $day) {
+                    DoctorSlot::create([
+                        'doctor_id' => $doctor->id,
+                        'day' => $day,
+                        'start_time' => $startTime,
+                        'end_time' => $endTime,
+                    ]);
+                }
+            }
+            else {
                 $workingDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
 
             // Work hours

@@ -4,29 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use App\Models\Clinic;
-use App\Models\District;
 use App\Models\Doctor;
 use App\Models\DoctorSlot;
-use App\Models\PatientSymptom;
-use App\Models\Symptom;
 use App\Models\TimeSlot;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
-class AppointmentController extends Controller
+class MedicationController
 {
-    private string $rootRoute = '';
+    private string $rootRoute = 'medicine';
 
     /**
      * Display the booking form or appointment details.
      *
+     * @param Request $request
      * @return View
      */
-    public function showBookingForm(): View
+    public function showBookingForm(Request $request): View
     {
         $appointmentDetails = $this->checkAppointment();
         $path = "{$this->rootRoute}/cancel-appointment";
@@ -35,9 +32,7 @@ class AppointmentController extends Controller
             return view('AppointmentDetails', compact('appointmentDetails', 'path'));
         }
 
-        $symptoms = Symptom::all();
-
-        return view('patient_symptoms', compact('symptoms'));
+        return $this->showTimeChoose($request);
     }
 
     /**
@@ -60,15 +55,15 @@ class AppointmentController extends Controller
         $districtId = $user->district_id;
 
         // Calculate time slot duration based on district population
-        $population = District::where('id', $districtId)->value('population');
-        $timeSlotDuration = $population < 25000 ? 15 : 10;
+        // $population = District::where('id', $districtId)->value('population');
+        $timeSlotDuration = 15;
 
         // Get today's date and one month ahead
         $today = Carbon::today();
         $endDate = $today->copy()->addMonth();
 
         $appointments = Appointment::where('doctor_id', $doctorId)
-            ->whereNotIn('status', ['Cancelled', 'Done'])
+            ->where('status', '!=', 'Done')
             ->whereBetween('appointment_date', [$today, $endDate])
             ->get(['appointment_date', 'time_id']);
 
@@ -76,27 +71,9 @@ class AppointmentController extends Controller
             ? []
             : $appointments->groupBy('appointment_date');
 
-        // Define time frames for severity levels
-        $severityTimeFrames = [
-            3 => ['start' => '8:00:00', 'end' => '12:00:00'],
-            2 => ['start' => '12:00:00', 'end' => '15:00:00'],
-            1 => ['start' => '15:00:00', 'end' => '17:00:00'],
-        ];
-
-        $level = PatientSymptom::withoutTrashed()
-            ->where('user_id', $user->id)
-            ->pluck('level')
-            ->last();
-
-        // Fallback to a default level if none is found
-        $level = $level ?? 1;
-
-        $startTime = $severityTimeFrames[$level]['start'];
-        $endTime = $severityTimeFrames[$level]['end'];
-
         $timeSlots = TimeSlot::where('duration', $timeSlotDuration)
-            ->where('start_time', '>=', $startTime)
-            ->where('end_time', '<=', $endTime)
+            ->where('start_time', '>=', '15:00:00')
+            ->where('end_time', '<=', '17:00:00')
             ->get(['id', 'start_time', 'duration']);
 
         $doctorAvailability = DoctorSlot::where('doctor_id', $doctorId)
@@ -138,6 +115,7 @@ class AppointmentController extends Controller
 
         ksort($availableSlotsByDate);
 
+        // $path holds the fully qualified class name
         $path = "{$this->rootRoute}/bookslot";
 
         return view('times', [
@@ -180,57 +158,12 @@ class AppointmentController extends Controller
             'doctor_id' => $doctorId,
             'patient_id' => $user->id,
             'appointment_date' => $appointmentDate,
-            'type' => 'normal',
+            'type' => 'medicine',
             'time_id' => $timeSlot->id,
             'status' => 'Pending',
         ]);
 
         return redirect()->route('success')->with('success', 'Your appointment has been successfully booked!');
-    }
-
-    /**
-     * Store patient symptoms.
-     *
-     * @param Request $request
-     * @return RedirectResponse
-     */
-    public function storePatientSymptoms(Request $request): RedirectResponse
-    {
-        $appointmentDetails = $this->checkAppointment();
-        $path = "{$this->rootRoute}/cancel-appointment";
-
-        if ($appointmentDetails) {
-            return view('AppointmentDetails', compact('appointmentDetails', 'path'));
-        }
-
-        $validatedData = $request->validate([
-            'symptoms_list' => 'required|json',
-        ], [
-            'symptoms_list.required' => 'Please select at least one symptom.',
-            'symptoms_list.json' => 'Invalid symptoms format. Please try again.',
-        ]);
-
-        if (!Auth::check()) {
-            return redirect()->back()->withErrors(['auth' => 'You must be logged in to book an appointment.']);
-        }
-
-        $userId = Auth::id();
-        $symptoms = json_decode($validatedData['symptoms_list'], true);
-
-        if (!is_array($symptoms)) {
-            return redirect()->back()->withErrors(['symptoms' => 'Invalid symptoms data provided. Please try again.']);
-        }
-
-        $isEmergency = Symptom::whereIn('name', $symptoms)->where('is_emergency', true)->exists();
-        $level = $isEmergency ? 3 : (count($symptoms) > 1 ? 2 : 1);
-
-        PatientSymptom::create([
-            'user_id' => $userId,
-            'symptoms' => json_encode($symptoms),
-            'level' => $level,
-        ]);
-
-        return $this->showTimeChoose($request);
     }
 
     /**
@@ -276,12 +209,10 @@ class AppointmentController extends Controller
         $appointment = Appointment::where('patient_id', $user->id)
             // ->where('doctor_id', $doctorId)
             ->whereNotIn('status', ['cancelled', 'Done'])
-            ->where('type', 'normal')
+            ->where('type', 'medicine')
             ->delete();
 
         if ($appointment) {
-            PatientSymptom::where('user_id', $user->id)->delete();
-
             return redirect()->intended('home')->with([
                 'success' => true,
                 'message' => 'Appointment cancelled successfully.',
@@ -308,9 +239,13 @@ class AppointmentController extends Controller
             return view('AppointmentDetails', compact('appointmentDetails', 'path'));
         }
 
-        $clinics = Clinic::with(['city', 'district'])
+        $clinics = Clinic::with(['city', 'district', 'doctors'])
             ->get()
-            ->makeHidden(['created_at', 'updated_at']);
+            ->makeHidden(['created_at', 'updated_at'])
+            ->filter(function ($clinic) {
+                // Check if "Vaccination Specialist" is in the clinic's specialties
+                return $clinic->doctors->pluck('specialty')->contains('hospital pharmacist');
+            });
 
         $path = "{$this->rootRoute}/showDoctor";
 
@@ -337,8 +272,7 @@ class AppointmentController extends Controller
 
         $doctors = Doctor::withoutTrashed()
             ->where('clinic_id', $clinicId)
-            ->where('specialty', '!=', 'Vaccination Specialist')
-            ->where('specialty', '!=',  'hospital pharmacist')
+            ->where('specialty',  'hospital pharmacist')
             ->get()
             ->makeHidden(['created_at', 'updated_at', 'deleted_at']);
 
@@ -360,7 +294,7 @@ class AppointmentController extends Controller
     {
         session(['doctor_id' => $doctorId]);
 
-        return redirect("/book-appointment");
+        return redirect("/{$this->rootRoute}/book-appointment");
     }
 
     /**
@@ -375,8 +309,8 @@ class AppointmentController extends Controller
 
         $appointmentDetails = Appointment::with(['doctor.clinic', 'timeSlot'])
             ->where('status', 'Pending')
-            ->where('type', 'normal')
             ->where('patient_id', $user->id)
+            ->where('type', 'medicine')
             ->get()
             ->map(function ($appointment) {
                 return [
@@ -388,13 +322,6 @@ class AppointmentController extends Controller
             })
             ->first();
 
-        if ($appointmentDetails) {
-            $symptoms = PatientSymptom::where('user_id', $user->id)->pluck('symptoms');
-            $appointmentDetails['symptoms'] = $symptoms->isNotEmpty() ? json_decode($symptoms->first(), true) : [];
-
-            return $appointmentDetails;
-        }
-
-        return false;
+        return $appointmentDetails ?: false;
     }
 }

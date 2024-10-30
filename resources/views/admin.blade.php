@@ -65,7 +65,7 @@
                 <i class="fas fa-syringe"></i> Vaccine Booking
             </button></li>
         <li><button class="button" onclick="showForm('viewUsers', 'View Users')">
-                <i class="fas fa-users"></i> View Users
+                <i class="fas fa-users"></i> View Patients
             </button></li>
         <li>
             <button class="button" onclick="showForm('viewDoctors', 'View Doctors')">

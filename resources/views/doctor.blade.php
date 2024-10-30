@@ -6,7 +6,7 @@
                     <h2>{{ $doctor->name }}</h2>
                     <p><strong>Specialty:</strong> {{ $doctor->specialty }}</p>
                     <p><strong>Clinic:</strong> {{ $doctor->clinic->name }}</p>
-                    <button class="select-doctor-button" data-clinic-id="{{ $doctor->id }}">Book Now</button>
+                    <button class="select-doctor-button" data-clinic-id="{{ $doctor->id }}">View Reservations</button>
                 </div>
             </div>
         @endforeach

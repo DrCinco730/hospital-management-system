@@ -36,7 +36,7 @@ return new class extends Migration
 //             $table->dateTime('appointment_datetime');
 
             $table->enum('status', ['Pending', 'Done', 'Cancelled'])->default('Pending');
-            $table->enum('type', ['normal', 'vaccine'])->default('normal');
+            $table->enum('type', ['normal', 'vaccine', 'medicine'])->default('normal');
             $table->text('notes')->nullable();
 
             $table->unique(

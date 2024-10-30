@@ -21,7 +21,7 @@ class SpecialtySeeder extends Seeder
             'Orthopedic Surgery', 'Pulmonology', 'Endocrinology', 'Hematology & Oncology',
             'Sports Medicine', 'Anesthesiology', 'Infectious Diseases', 'Emergency Medicine',
             'Physical Medicine & Rehabilitation', 'Plastic Surgery', 'Urology', 'Pathology',
-            'Nuclear Medicine', 'Rheumatology' , 'Vaccination Specialist'
+            'Nuclear Medicine', 'Rheumatology' , 'Vaccination Specialist' , 'hospital pharmacist'
         ];
 
         foreach ($specialties as $specialty) {

@@ -10,6 +10,7 @@ use App\Models\Doctor;
 use App\Models\District;
 use App\Models\GeneralStaff;
 use App\Models\Nurse;
+use App\Models\Record;
 use App\Models\Specialty;
 use App\Models\User;
 use App\Models\Login;
@@ -493,5 +494,11 @@ class AdminController extends Controller
             // Catch any unexpected errors and return an error message
             return redirect()->back()->with('error', 'An unexpected error occurred while trying to delete the staff members.');
         }
+    }
+
+    public function records()
+    {
+        $record = Record::all();
+        return response()->json($record);
     }
 }

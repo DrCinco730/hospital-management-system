@@ -44,7 +44,7 @@
 
     // Navigate to the Medication Booking page
     function goToDrugBooking() {
-        window.location.href = "{{ route('dispense_medications') }}"; // Adjust to your route name
+        window.location.href = "{{ url('/medicine/showClinic') }}"; // Adjust to your route name
     }
 </script>
 

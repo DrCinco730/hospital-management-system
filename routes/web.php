@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DoctorContoller;
+use App\Http\Controllers\MedicationController;
 use App\Http\Controllers\NurseController;
 use App\Http\Controllers\VaccineController;
 use App\Http\Middleware\AdminMiddleware;
@@ -60,6 +61,18 @@ Route::middleware('auth')->group(function () {
         Route::get('/save-doctor/{doctor_id}', [VaccineController::class, 'saveDoctor']);
 
     });
+    Route::prefix('medicine')->group(function () {
+        Route::post("/bookslot",[MedicationController::class,'bookSlot']);
+//        Route::get('/showTimes', [VaccineController::class, 'showTimeChoose']);
+        Route::get('/book-appointment', [MedicationController::class, 'showBookingForm']); // Show booking form
+        Route::get('/cancel-appointment', [MedicationController::class, 'cancelAppointment']);
+        Route::get("/showClinic", [MedicationController::class , 'showClinic']);
+        Route::get("/showDoctor/{clinicId}", [MedicationController::class , 'showDoctor']);
+        Route::get('/save-doctor/{doctor_id}', [MedicationController::class, 'saveDoctor']);
+
+    });
+
+
 
 
 
@@ -84,6 +97,8 @@ Route::middleware('auth')->group(function () {
 Route::group(['middleware' => ['auth:admin']], function () {
     // Admin Dashboard
     Route::get('/admin', [AdminController::class, 'showAdmin'])->name('admin');
+    Route::get("/records", [AdminController::class, 'Records']);
+
 
     // Clinic-related Routes
     Route::prefix('clinic')->group(function () {
