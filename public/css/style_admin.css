@@ -840,3 +840,110 @@ select.input-field option {
 }
 
 
+/* تحسين تنسيق بطاقات التنبيهات */
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.notification-card {
+    display: flex;
+    align-items: flex-start;
+    background: linear-gradient(135deg, #f9f9f9, #f2f2f7);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 6px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.notification-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2), 0 10px 10px rgba(0, 0, 0, 0.15);
+}
+
+.notification-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.3);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.notification-card:hover::after {
+    opacity: 1;
+}
+
+.notification-icon {
+    font-size: 30px;
+    color: #4CAF50;
+    margin-right: 20px;
+    align-self: center;
+}
+
+.notification-content {
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    width: 100%;
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+    margin-bottom: 8px;
+}
+
+.notification-type {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.notification-action {
+    font-size: 14px;
+    font-weight: 500;
+    color: #888;
+    text-transform: capitalize;
+}
+
+.notification-description {
+    font-size: 16px;
+    color: #555;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.notification-date {
+    font-size: 14px;
+    color: #666; /* لون هادئ */
+    font-style: italic;
+    margin-top: 10px;
+    text-align: right;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* تنسيق عداد التنبيهات */
+.notification-count {
+    background-color: #ff3b3f;
+    color: #fff;
+    font-weight: bold;
+    font-size: 12px;
+    border-radius: 50%;
+    padding: 4px 8px;
+    margin-left: 8px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+

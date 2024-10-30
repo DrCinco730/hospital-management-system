@@ -9,7 +9,10 @@ class NurseController
 {
     function showPatient()
     {
-        $appointments = Appointment::with(['timeSlot','doctor','patient'])->where('status','Pending')->get();
+        $appointments = Appointment::with(['timeSlot','doctor','patient'])
+        ->where('type', "!=",'normal')
+//        ->where('status','Pending'
+        ->get();
 
 //        $appointments->makeHidden(['created_at', 'updated_at', 'deleted_at','doctor_id','time_id']);
 

@@ -37,10 +37,12 @@ class AdminController extends Controller
 
         $doctors_specialties = Specialty::all()->makeHidden(['created_at', 'updated_at']);
 
+        $count_notification = Record::where("status","unread")->count();
+
 //        return response()->json($users);
 
 //         Return view with cities, clinics, and users data
-        return view('admin', compact('cities', 'clinics', 'users','doctors','doctors_specialties'))
+        return view('admin', compact('cities', 'clinics', 'users','doctors','doctors_specialties','count_notification'))
             ->with('success', 'You have successfully logged in.');
     }
 
@@ -476,15 +478,21 @@ class AdminController extends Controller
 
             // Delete doctors, nurses, and general staff by their IDs using soft deletes if applicable
             if (!empty($doctorIds)) {
-                Doctor::whereIn('id', $doctorIds)->delete();
+                foreach ($doctorIds as $id) {
+                    Doctor::find($id)?->delete(); // Use null safe operator to avoid errors if not found
+                }
             }
 
             if (!empty($nurseIds)) {
-                Nurse::whereIn('id', $nurseIds)->delete();
+                foreach ($nurseIds as $id) {
+                    Nurse::find($id)?->delete();
+                }
             }
 
             if (!empty($generalStaffIds)) {
-                GeneralStaff::whereIn('id', $generalStaffIds)->delete();
+                foreach ($generalStaffIds as $id) {
+                    GeneralStaff::find($id)?->delete();
+                }
             }
 
             // Return a success message to the user
@@ -496,9 +504,13 @@ class AdminController extends Controller
         }
     }
 
+
     public function records()
     {
-        $record = Record::all();
-        return response()->json($record);
+        $record = Record::all()->reverse();
+
+        Record::where('status', '!=', 'read')->update(['status' => 'read']);
+        //        return response()->json($record);
+        return view("notification",compact('record'));
     }
 }

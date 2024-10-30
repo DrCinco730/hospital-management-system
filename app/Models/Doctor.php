@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Log;
 
 
 class Doctor extends Authenticatable
@@ -53,7 +54,7 @@ class Doctor extends Authenticatable
                         'end_time' => $endTime,
                     ]);
                 }
-            } elseif ($doctor->specialty === 'Clinic Specialist') {
+            } elseif ($doctor->specialty === 'hospital pharmacist') {
                 $workingDays = ['Thursday'];
 
                 // Work hours
@@ -73,19 +74,19 @@ class Doctor extends Authenticatable
             else {
                 $workingDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
 
-            // Work hours
-            $startTime = '08:00:00';
-            $endTime = '17:00:00';
+                // Work hours
+                $startTime = '08:00:00';
+                $endTime = '17:00:00';
 
-            // Create slots for each working day
-            foreach ($workingDays as $day) {
-                DoctorSlot::create([
-                    'doctor_id' => $doctor->id,
-                    'day' => $day,
-                    'start_time' => $startTime,
-                    'end_time' => $endTime,
-                ]);
-            }
+                // Create slots for each working day
+                foreach ($workingDays as $day) {
+                    DoctorSlot::create([
+                        'doctor_id' => $doctor->id,
+                        'day' => $day,
+                        'start_time' => $startTime,
+                        'end_time' => $endTime,
+                    ]);
+                }
             }
         });
     }

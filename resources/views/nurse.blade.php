@@ -216,7 +216,7 @@
                                 N/A
                             @endif
                         </td>
-                        <td data-label="Visit Type">Visit Doctor</td>
+                        <td data-label="Visit Type">{{$appointment['type']}}</td>
                         <td data-label="Status">{{ $appointment['status'] }}</td>
                         <td data-label="Notes">
                             @if(isset($appointment['notes']) && $appointment['notes'] !== null)

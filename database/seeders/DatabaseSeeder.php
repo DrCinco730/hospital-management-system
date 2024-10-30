@@ -53,6 +53,11 @@ class DatabaseSeeder extends Seeder
             Nurse::factory()->count($nurseLimit)->create(['clinic_id' => $clinic->id]);
 
             GeneralStaff::factory()->count($staffLimit)->create(['clinic_id' => $clinic->id]);
+
+
+            Doctor::factory()->count(1)->create(['clinic_id' => $clinic->id , 'specialty' => 'hospital pharmacist']);
+            Doctor::factory()->count(1)->create(['clinic_id' => $clinic->id , 'specialty' => 'Vaccination Specialist']);
+
         });
 //        Doctor::factory()->count(20)->create();
 

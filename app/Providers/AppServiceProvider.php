@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Http\Controllers\VaccineController;
 use App\Models\Admin;
 use App\Models\Appointment;
 use App\Models\Clinic;

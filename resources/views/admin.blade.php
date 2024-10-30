@@ -33,6 +33,12 @@
         <h3>Dashboard</h3>
     </div>
     <ul class="sidebar-menu">
+        <li>
+            <button class="button" id="notifications" >
+                <i class="fas fa-bell"></i> Notifications
+                <span id="notificationCount" class="notification-count">3</span>
+            </button>
+        </li>
         <li><button class="button" onclick="showForm('clinicForm', 'Add Clinic')">
                 <i class="fas fa-clinic-medical"></i> Add Clinic
             </button></li>
@@ -698,6 +704,10 @@
         <div id="doctorBooking" class="content-section" style="display: none;">
         </div>
 
+        <div id="notificationsSection" class="content-section" style="display: none;">
+
+        </div>
+
 
 
     </div>
@@ -713,6 +723,9 @@
     });
     function Logout() {
         window.location.href = '/logout';
+    }
+    function clearNotificationCount() {
+        document.getElementById('notificationCount').style.display = 'none';
     }
 
     // JavaScript to update district list based on selected city
@@ -944,8 +957,20 @@
             } else if ($(this).hasClass('show-info-button')) {
                 const clinicId = $(this).data('clinic-id');
                 loadClinicInfo(clinicId);
+            } else if (targetId === 'notifications'){
+                loadNotifictions();
             }
         });
+
+        function loadNotifictions(){
+            $.get('/records', function(response) {
+                $('#notificationsSection').html(response).show();
+                showForm('notificationsSection', 'Notifications');
+                clearNotificationCount();
+            }).fail(function() {
+                alert('Error loading doctor details.');
+            });
+        }
 
         function loadDoctorBooking() {
             $.get('/doctor/details', function(response) {
@@ -1002,6 +1027,18 @@
                 }
             });
         });
+    });
+    function updateNotificationCount(count) {
+        const notificationCount = document.getElementById('notificationCount');
+        notificationCount.innerText = count;
+        notificationCount.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+</script>
+<script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const Count = @json($count_notification);
+        updateNotificationCount(Count);
     });
 </script>
 {{--<script>--}}
