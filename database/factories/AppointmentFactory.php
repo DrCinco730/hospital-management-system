@@ -73,6 +73,7 @@ class AppointmentFactory extends Factory
             'time_id' => $timeSlot->id,
             'appointment_date' => $appointmentDate,
             'status' => 'Pending',
+            'type' => 'normal' ,
             'notes' => $this->faker->optional()->sentence,
         ];
     }

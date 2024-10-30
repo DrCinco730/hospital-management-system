@@ -22,6 +22,11 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
+
+
+            $table->unique(['email', 'deleted_at'], 'unique_email')->whereNull('deleted_at');
+            $table->unique(['username', 'deleted_at'], 'unique_username')->whereNull('deleted_at');
 
             // Foreign key reference to clinics table
             $table->foreign('clinic_id')->references('id')->on('clinics')->onDelete('cascade');

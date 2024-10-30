@@ -21,6 +21,12 @@ return new class extends Migration
 
             $table->integer('experience');
             $table->softDeletes(); // Adds deleted_at column for soft deletes
+
+
+
+            $table->unique(['email', 'deleted_at'], 'unique_email')->whereNull('deleted_at');
+            $table->unique(['username', 'deleted_at'], 'unique_username')->whereNull('deleted_at');
+
         });
     }
 

@@ -666,6 +666,8 @@
                     <th>#</th>
                     <th>User Name</th>
                     <th>Email</th>
+                    <th>City</th>
+                    <th>District</th>
                     <th>Status</th>
                 </tr>
                 </thead>
@@ -675,6 +677,8 @@
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $user->first_name }} {{ $user->last_name }}</td>
                         <td>{{ $user->email }}</td>
+                        <td>{{ $user->city->name }}</td>
+                        <td>{{ $user->district->name }}</td>
                         <td>{{ $user->deleted_at ? 'Inactive' : 'Active' }}</td> <!-- Adjust based on your actual status field -->
                     </tr>
                 @endforeach

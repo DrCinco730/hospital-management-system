@@ -37,19 +37,26 @@
     </div>
 </div>
 
-<!-- نموذج الحجز -->
-<form id="booking-form" method="POST" action="{{ route('book.slot') }}">
+
+<form id="booking-form" method="POST" action="{{url($path)}}">
     @csrf
     <input type="hidden" name="time_slot" id="time_slot_input" value="">
     <input type="hidden" name="appointment_date" id="appointment_date_input" value="">
 </form>
-
 <script>
-    // إعداد البيانات (هنا ستضع البيانات المتاحة لديك للجلسات)
-    const availableTimes = @json($availableTimes);
+    // Initialize availableTimes from controller data
+    const availableTimes = @json($availableTimes) ?? {};
+    const enabledDates = Object.keys(availableTimes);
 
     let selectedDate = null;
     let selectedTime = null;
+
+    // Get today's date in 'YYYY-MM-DD' format based on local timezone
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const formattedToday = `${yyyy}-${mm}-${dd}`;
 
     document.addEventListener('DOMContentLoaded', function () {
         flatpickr("#calendar", {
@@ -57,82 +64,131 @@
             altFormat: "F j, Y",
             dateFormat: "Y-m-d",
             inline: true,
+            minDate: "today",
+            locale: "en", // Change dynamically if needed
+            enable: enabledDates,
+            disable: [
+                function(date) {
+                    // Disable Saturdays (6) and Sundays (0)
+                    return (date.getDay() === 0 || date.getDay() === 6);
+                }
+            ],
             onChange: function (selectedDates, dateStr) {
                 selectedDate = dateStr;
                 displayAvailableTimes(dateStr);
             },
-            onDayCreate: function (dObj, dStr, fp, dayElem) {
-                const dateObj = dayElem.dateObj;
-                const formattedDate = dateObj.toISOString().split('T')[0];
-
-                if (!(formattedDate in availableTimes)) {
-                    dayElem.classList.add("disabled");
-                }
-            }
         });
     });
 
-    // عرض الأوقات المتاحة حسب التاريخ
     function displayAvailableTimes(date) {
         const timesList = document.getElementById('times-list');
         const instruction = document.getElementById('instruction');
         timesList.innerHTML = '';
         selectedTime = null;
         document.getElementById('book-now').disabled = true;
+        document.getElementById('book-now').setAttribute('aria-disabled', 'true');
 
         if (availableTimes[date] && availableTimes[date].slots.length > 0) {
             instruction.textContent = 'Select a preferred time:';
 
             availableTimes[date].slots.forEach(slot => {
-                const timeElement = document.createElement('div');
+                // Disable past slots if the selected date is today
+                if (date === formattedToday) {
+                    const [hour, minute, second] = slot.start_time.split(':').map(Number);
+                    const slotTime = new Date();
+                    slotTime.setHours(hour, minute, second, 0);
+
+                    if (slotTime < today) {
+                        // Skip adding this slot as it's in the past
+                        return;
+                    }
+                }
+
+                const timeElement = document.createElement('button');
                 timeElement.className = 'time-slot';
                 timeElement.innerText = formatTime(slot.start_time);
+                timeElement.setAttribute('type', 'button');
+                timeElement.setAttribute('role', 'option');
+                timeElement.setAttribute('aria-selected', 'false');
+                timeElement.setAttribute('tabindex', '0');
 
                 timeElement.addEventListener('click', function () {
                     clearSelectedSlots();
                     timeElement.classList.add('selected');
+                    timeElement.setAttribute('aria-selected', 'true');
                     selectedTime = slot.start_time;
-                    selectTimeSlot(slot.id, slot.start_time, date);
+                    selectTimeSlot(date, slot.id, slot.start_time);
+                });
+
+                timeElement.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        timeElement.click();
+                    }
                 });
 
                 timesList.appendChild(timeElement);
             });
+
+            // Handle case where all slots are in the past
+            if (timesList.children.length === 0) {
+                instruction.textContent = 'No available times for this day.';
+            }
         } else {
             instruction.textContent = 'No available times for this day.';
         }
     }
 
-    // تنسيق الوقت إلى AM/PM
     function formatTime(timeString) {
         const [hour, minute] = timeString.split(':');
-        const amPm = hour >= 12 ? 'PM' : 'AM';
-        const formattedHour = hour % 12 || 12;
+        const hourInt = parseInt(hour, 10);
+        const amPm = hourInt >= 12 ? 'PM' : 'AM';
+        const formattedHour = hourInt % 12 || 12;
         return `${formattedHour}:${minute} ${amPm}`;
     }
 
-    // تحديد الوقت المحدد لتحديث النموذج
-    function selectTimeSlot(timeSlotId, time, date) {
+    function selectTimeSlot(date, timeSlotId, time) {
+        // If using composite ID
+        // const compositeId = `${date}-${timeSlotId}`;
         document.getElementById('time_slot_input').value = timeSlotId;
         document.getElementById('appointment_date_input').value = date;
 
-        document.getElementById('book-now').disabled = false; // تمكين زر الحجز
+        document.getElementById('book-now').disabled = false;
+        document.getElementById('book-now').setAttribute('aria-disabled', 'false');
+        document.getElementById('book-now').focus();
     }
 
-    // دالة لإرسال النموذج عند الضغط على الزر "Book Now"
     function submitBooking() {
         if (selectedDate && selectedTime) {
-            document.getElementById('booking-form').submit();
+            const formattedTime = formatTime(selectedTime);
+            if (confirm(`Confirm booking on ${selectedDate} at ${formattedTime}?`)) {
+                document.getElementById('booking-form').submit();
+            }
         } else {
             alert("Please select a date and time before booking.");
         }
     }
 
-    // إزالة التأثير من الأوقات السابقة عند اختيار وقت جديد
     function clearSelectedSlots() {
         const allTimeSlots = document.querySelectorAll('.time-slot');
-        allTimeSlots.forEach(slot => slot.classList.remove('selected'));
+        allTimeSlots.forEach(slot => {
+            slot.classList.remove('selected');
+            slot.setAttribute('aria-selected', 'false');
+        });
     }
 </script>
+
+<style>
+    div.flatpickr-days div.dayContainer span.flatpickr-day.flatpickr-disabled {
+        color: #161515;
+        /* رمادي للأيام غير المتاحة */
+        opacity: 0.5;
+        cursor: not-allowed;
+        /* عدم السماح بالنقر */
+        pointer-events: none;
+        /* منع التفاعل */
+    }
+</style>
 
 </body>
 </html>

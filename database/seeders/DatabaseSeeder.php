@@ -56,7 +56,7 @@ class DatabaseSeeder extends Seeder
         });
 //        Doctor::factory()->count(20)->create();
 
-        $this->call(DoctorSlotsSeeder::class);
+//        $this->call(DoctorSlotsSeeder::class);
 
 
         if (Doctor::count() > 0 && User::count() > 0 && TimeSlot::count() > 0) {

@@ -137,15 +137,7 @@
 }
 
 /* تغيير لون الأيام المعطلة */
-.flatpickr-day.disabled {
-    color: #161515;
-    /* رمادي للأيام غير المتاحة */
-    opacity: 0.5;
-    cursor: not-allowed;
-    /* عدم السماح بالنقر */
-    pointer-events: none;
-    /* منع التفاعل */
-}
+
 
 /* تخصيص أزرار التنقل */
 .flatpickr-prev-month,

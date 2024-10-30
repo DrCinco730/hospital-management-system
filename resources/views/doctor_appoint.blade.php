@@ -187,13 +187,10 @@
             <table class="custom-table">
                 <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>Case Number</th>
                     <th>Patient Name</th>
                     <th>Appointment Date</th>
                     <th>Start Time</th>
-                    <th>Doctor</th>
-                    <th>Visit Type</th>
-                    <th>Status</th>
                     <th>Symptoms</th>
                     <th>Symptom Level</th>
                     <th>Notes</th>
@@ -203,13 +200,10 @@
                 <!-- Begin Loop -->
                 @foreach($appointments as $appointment)
                     <tr>
-                        <td data-label="ID">{{ $appointment['id'] }}</td>
+                        <td data-label="Case Number">{{ $appointment['id'] }}</td>
                         <td data-label="Patient Name">{{ $appointment['patient']['first_name'] }} {{ $appointment['patient']['last_name'] }}</td>
                         <td data-label="Appointment Date">{{ $appointment->appointment_date }}</td>
                         <td data-label="Start Time">{{ $appointment->timeSlot->start_time }}</td>
-                        <td data-label="Doctor">{{ $appointment['doctor']['name'] }}</td>
-                        <td data-label="Visit Type">Visit Doctor</td>
-                        <td data-label="Status">{{ $appointment['status'] }}</td>
                         <td data-label="Symptoms">
                             @foreach($appointment->patient->patientSymptoms as $symptom)
                                 {{ implode(', ', json_decode($symptom['symptoms'])) }}<br>

@@ -3,48 +3,51 @@
 namespace App\Http\Controllers;
 
 use App\Models\Appointment;
-use App\Models\PatientSymptom;
-use App\Models\TimeSlot;
-use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
 
-class DoctorContoller
+class DoctorContoller extends Controller
 {
-    function showPatient()
+    public function showPatient()
     {
-        $appointments = Appointment::with(['timeSlot', 'doctor', 'patient.patientSymptoms'])
-            ->withoutTrashed()
-            ->where('status', 'Pending')
-            ->get();
+        $user = Auth::guard('doctor')->user();
 
-        // Hiding unwanted fields in the appointments data
-        $appointments->makeHidden(['created_at', 'updated_at', 'deleted_at', 'doctor_id', 'time_id']);
+        // Fetch pending appointments with related data
+        $appointments = Appointment::with(['timeSlot', 'patient.patientSymptoms' => function ($query) {
+            $query->latest()->limit(1); // Limit to latest symptom
+        }])
+            ->where('status', 'Pending')
+//            ->where('doctor_id', $user->id)
+            ->orderBy('appointment_date') // Ensures appointments are sorted by date in the DB
+            ->get()
+            ->map(function ($item) {
+                // Simplify the data structure
+                $item['start_time'] = $item->timeSlot->start_time;
+                return $item;
+            })
+            ->makeHidden(["timeSlot", 'created_at', 'updated_at', 'deleted_at', 'doctor_id', 'time_id', 'patient_id', 'id']);
 
         $appointments->each(function ($appointment) {
-            // Hide unnecessary doctor information
-            $appointment->doctor->makeHidden(['created_at', 'updated_at', 'deleted_at', 'clinic_id', 'id', 'specialty', 'experience', 'email', 'username']);
-
-            // Hide unnecessary timeSlot information
-            $appointment->timeSlot->makeHidden(['id', 'duration', 'end_time']);
-
-            // Hide unnecessary patient information
+            // Hide sensitive patient data
             $appointment->patient->makeHidden(['created_at', 'updated_at', 'deleted_at', 'city_id', 'district_id', 'email', 'username', 'date_of_birth', 'id_number']);
-
-            // Filter to only include the last symptom entry for each patient
-            if ($appointment->patient->patientSymptoms->isNotEmpty()) {
-                $lastSymptom = $appointment->patient->patientSymptoms->last();
-                $appointment->patient->setRelation('patientSymptoms', collect([$lastSymptom]));
-            }
-
-            // Hide unnecessary fields in the symptom details
-            $appointment->patient->patientSymptoms->each(function ($symptom) {
-                $symptom->makeHidden(['created_at', 'updated_at', 'deleted_at', 'user_id', 'id']);
-            });
+            // Limit to the latest symptom
+            $appointment->patient->patientSymptoms->each->makeHidden(['created_at', 'updated_at', 'deleted_at', 'user_id', 'id']);
         });
 
-//        return response()->json($appointments);
-        return view('doctor_appoint', ['appointments' => $appointments]);
+        // Sort by date and start time
+        $sortedAppointments = $appointments->sortBy([
+            ['appointment_date', 'asc'],
+            ['start_time', 'asc'],
+        ])->values();
 
+        // Assign new sequential IDs
+        $appointmentsWithNewIds = $sortedAppointments->values()->map(function ($appointment, $index) {
+            $appointment['id'] = $index + 1; // New ID
+            return $appointment;
+        });
+
+//        return response()->json($appointmentsWithNewIds);
+//
+        return view('doctor_appoint', ['appointments' => $appointmentsWithNewIds]);
     }
-
-    }
-
+}

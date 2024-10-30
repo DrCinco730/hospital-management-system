@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DoctorContoller;
 use App\Http\Controllers\NurseController;
+use App\Http\Controllers\VaccineController;
 use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
@@ -42,13 +43,23 @@ Route::middleware('auth')->group(function () {
     Route::post("/bookslot",[AppointmentController::class,'bookSlot'])->name('book.slot');
     Route::get('/showTimes', [AppointmentController::class, 'showTimeChoose'])->name('showTimes');
 
-    Route::get("/times",function(){return view("times");})->name('times');
-    Route::get('/book-appointment', [AppointmentController::class, 'showBookingForm'])->name('appointment.form'); // Show booking form
+    Route::get('/book-appointment', [AppointmentController::class, 'showBookingForm']); // Show booking form
     Route::post('/book-appointment', [AppointmentController::class, 'storePatientSymptoms'])->name('appointment.store');
     Route::get('/cancel-appointment', [AppointmentController::class, 'cancelAppointment'])->name('cancel.appointment');
     Route::get("/showClinic", [AppointmentController::class , 'showClinic'])->name('showClinic');
     Route::get("/showDoctor/{clinicId}", [AppointmentController::class , 'showDoctor'])->name('showDoctor');
-    Route::get('/save-doctor', [AppointmentController::class, 'saveDoctor'])->name('saveDoctor');
+    Route::get('/save-doctor/{doctor_id}', [AppointmentController::class, 'saveDoctor']);
+
+    Route::prefix('vaccine')->group(function () {
+        Route::post("/bookslot",[VaccineController::class,'bookSlot']);
+//        Route::get('/showTimes', [VaccineController::class, 'showTimeChoose']);
+        Route::get('/book-appointment', [VaccineController::class, 'showBookingForm']); // Show booking form
+        Route::get('/cancel-appointment', [VaccineController::class, 'cancelAppointment']);
+        Route::get("/showClinic", [VaccineController::class , 'showClinic']);
+        Route::get("/showDoctor/{clinicId}", [VaccineController::class , 'showDoctor']);
+        Route::get('/save-doctor/{doctor_id}', [VaccineController::class, 'saveDoctor']);
+
+    });
 
 
 

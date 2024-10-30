@@ -28,12 +28,15 @@
             <p><span>Doctor Name:</span> {{ $appointmentDetails['doctor'] }}</p>
             <p><span>Appointment Date:</span> {{ $appointmentDetails['appointment_date'] }}</p>
             <p><span>Start Time:</span> {{ $appointmentDetails['start_time'] }}</p>
-            <p><span>Symptoms:</span></p>
-            <ul>
-                @foreach ($appointmentDetails['symptoms'] as $symptom)
-                    <li>{{ $symptom }}</li>
-                @endforeach
-            </ul>
+
+            @if(isset($appointmentDetails['symptoms']))
+                <p><span>Symptoms:</span></p>
+                <ul>
+                    @foreach ($appointmentDetails['symptoms'] as $symptom)
+                        <li>{{ $symptom }}</li>
+                    @endforeach
+                </ul>
+            @endif
         </div>
         <div class="countdown-title">Time Remaining Until Your Appointment:</div>
         <div class="countdown-container" id="countdown">
@@ -71,7 +74,7 @@
             'No, keep it',
             function okCallback() {
                 // Redirect to the cancel endpoint
-                window.location.href = '{{ route('cancel.appointment') }}';
+                window.location.href = '{{ url($path) }}';
             },
             function cancelCallback() {
                 Notiflix.Notify.info('Your appointment has not been cancelled.');

@@ -22,7 +22,7 @@ class Appointment extends Model
         'time_id',
         'appointment_date',
         'status',
-        'appointment_type',
+        'type',
         'notes',
     ];
 

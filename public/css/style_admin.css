@@ -196,7 +196,7 @@
 /* Main Box Styling */
 .main_box {
     width: calc(100% - 300px);
-    max-width: 800px;
+    max-width: 900px;
     position: relative;
     backdrop-filter: blur(25px);
     border: 2px solid var(--primary-color);

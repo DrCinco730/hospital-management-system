@@ -24,6 +24,11 @@ class CreateUsersTable extends Migration
             $table->rememberToken(); // Token for "remember me" functionality
             $table->timestamps(); // Created at and updated at timestamps
             $table->softDeletes(); // Adds deleted_at column for soft deletes
+
+
+
+            $table->unique(['email', 'deleted_at'], 'unique_email')->whereNull('deleted_at');
+            $table->unique(['username', 'deleted_at'], 'unique_username')->whereNull('deleted_at');
         });
     }
 

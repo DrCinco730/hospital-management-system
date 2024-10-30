@@ -14,7 +14,7 @@
 </head>
 <body>
 <x-user-dropdown-menu/>
-
+<x-popup-message/>
 <!-- Main Container -->
 <div class="wrapper">
     <div class="main_box">
@@ -29,7 +29,7 @@
         </div>
     </div>
 </div>
-<x-popup-message/>
+
 
 <script>
     // Navigate to the Appointment Booking page
@@ -39,7 +39,7 @@
 
     // Navigate to the Vaccine Booking page
     function goToVaccine() {
-        window.location.href = "{{ route('emergency') }}"; // Adjust to your route name
+        window.location.href = "{{ url('/vaccine/showClinic') }}"; // Adjust to your route name
     }
 
     // Navigate to the Medication Booking page

@@ -25,7 +25,7 @@
         </div>
         <div class="buttons-container">
             @foreach ($clinics as $clinic)
-                <div class="clinic-card" onclick="window.location.href='{{ route('showDoctor', $clinic->id) }}'">
+                <div class="clinic-card" onclick="window.location.href='{{ url($path . '/' . $clinic->id) }}'">
                     <img src="{{ asset('images/image.webp') }}" alt="Clinic">
                     <div class="card-content">
                         <h2>{{ $clinic->name }}</h2>

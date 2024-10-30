@@ -36,7 +36,7 @@ class AdminController extends Controller
 
         $doctors_specialties = Specialty::all()->makeHidden(['created_at', 'updated_at']);
 
-//        return response()->json($doctors_specialties);
+//        return response()->json($users);
 
 //         Return view with cities, clinics, and users data
         return view('admin', compact('cities', 'clinics', 'users','doctors','doctors_specialties'))

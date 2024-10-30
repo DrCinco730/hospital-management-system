@@ -25,7 +25,7 @@
         </div>
         <div class="buttons-container">
             @foreach ($doctors as $doctor)
-                <a href="{{ route('saveDoctor', ['doctor_id' => $doctor->id]) }}" class="clinic-card">
+                <a href="{{ url($path . "/" . $doctor->id) }}" class="clinic-card">
                     <img src="{{ asset('images/image_dector.webp') }}" alt="Doctor">
                     <div class="card-content">
                         <h2>{{ $doctor->name }}</h2>
