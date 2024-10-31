@@ -64,10 +64,10 @@
         <li><button class="button" id="doctorBook">
                 <i class="fas fa-calendar-check"></i> Doctor Booking
             </button></li>
-        <li><button class="button" onclick="showForm('medicationBooking', 'Medication Booking')">
+        <li><button class="button" id="medicationBookingButton" >
                 <i class="fas fa-pills"></i> Medication Booking
             </button></li>
-        <li><button class="button" onclick="showForm('vaccineBooking', 'Vaccine Booking')">
+        <li><button class="button" id="VaccineBookingButton">
                 <i class="fas fa-syringe"></i> Vaccine Booking
             </button></li>
         <li><button class="button" onclick="showForm('viewUsers', 'View Users')">
@@ -614,54 +614,12 @@
 
         <!-- Medication Booking Section -->
         <div id="medicationBooking" class="content-section" style="display: none;">
-            <table>
-                <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Patient Name</th>
-                    <th>Medication</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Status</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Jane Smith</td>
-                    <td>Aspirin</td>
-                    <td>2024-10-12</td>
-                    <td>2:00 PM</td>
-                    <td>Pending</td>
-                </tr>
-                </tbody>
-            </table>
+
         </div>
 
         <!-- Vaccine Booking Section -->
         <div id="vaccineBooking" class="content-section" style="display: none;">
-            <table>
-                <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Patient Name</th>
-                    <th>Vaccine</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Status</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Emily Johnson</td>
-                    <td>COVID-19</td>
-                    <td>2024-10-15</td>
-                    <td>9:00 AM</td>
-                    <td>Completed</td>
-                </tr>
-                </tbody>
-            </table>
+
         </div>
 
         <!-- View Users Section -->
@@ -959,6 +917,10 @@
                 loadClinicInfo(clinicId);
             } else if (targetId === 'notifications'){
                 loadNotifictions();
+            } else if(targetId === 'medicationBookingButton'){
+                loadPharmDoctorBooking();
+            } else if (targetId === 'VaccineBookingButton'){
+                loadVaccineDoctorBooking();
             }
         });
 
@@ -973,9 +935,27 @@
         }
 
         function loadDoctorBooking() {
-            $.get('/doctor/details', function(response) {
+            $.get('/doctor/details/all', function(response) {
                 $('#showClinicDetails').html(response).show();
                 showForm('showClinicDetails', 'Doctor Booking');
+            }).fail(function() {
+                alert('Error loading doctor details.');
+            });
+        }
+
+        function loadVaccineDoctorBooking() {
+            $.get('/doctor/details/Vaccination', function(response) {
+                $('#medicationBooking').html(response).show();
+                showForm('medicationBooking', 'Medication Booking');
+            }).fail(function() {
+                alert('Error loading doctor details.');
+            });
+        }
+
+        function loadPharmDoctorBooking() {
+            $.get('/doctor/details/pharmacist', function(response) {
+                $('#vaccineBooking').html(response).show();
+                showForm('vaccineBooking', 'Vaccine Booking');
             }).fail(function() {
                 alert('Error loading doctor details.');
             });

@@ -112,7 +112,7 @@ Route::group(['middleware' => ['auth:admin']], function () {
     // Doctor-related Routes
     Route::prefix('doctor')->group(function () {
         Route::post('/add', [AdminController::class, 'addDoctor'])->name('doctor/add');
-        Route::get('/details', [AdminController::class, 'showDoctor'])->name('doctor.details');
+        Route::get('/details/{type}', [AdminController::class, 'showDoctor'])->name('doctor.details');
         Route::get('/{doctor_id}/booking', [AdminController::class, 'DoctorBooking'])->name('doctorBooking')
             ->where('doctor_id', '[0-9]+'); // Ensure doctor_id is numeric
     });

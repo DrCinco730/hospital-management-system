@@ -39,6 +39,8 @@ class AdminController extends Controller
 
         $count_notification = Record::where("status","unread")->count();
 
+//        $vaccine = Appointment::with()
+
 //        return response()->json($users);
 
 //         Return view with cities, clinics, and users data
@@ -73,11 +75,27 @@ class AdminController extends Controller
         }
     }
 
-    public function showDoctor()
+    public function showDoctor($type='all')
     {
-        $doctors = Doctor::withoutTrashed()->with('clinic')
-            ->get()
-            ->makeHidden(['created_at', 'updated_at', 'deleted_at','clinic_id','email','experience','username']);
+
+
+        if($type === "all"){
+            $doctors = Doctor::withoutTrashed()->with('clinic')
+                ->whereNot('specialty','Vaccination Specialist')
+                ->whereNot('specialty','hospital pharmacist')
+                ->get()
+                ->makeHidden(['created_at', 'updated_at', 'deleted_at','clinic_id','email','experience','username']);
+        } elseif ($type === 'Vaccination'){
+            $doctors = Doctor::withoutTrashed()->with('clinic')
+                ->where('specialty','Vaccination Specialist')
+                ->get()
+                ->makeHidden(['created_at', 'updated_at', 'deleted_at','clinic_id','email','experience','username']);
+        } elseif ($type === 'pharmacist'){
+            $doctors = Doctor::withoutTrashed()->with('clinic')
+                ->where('specialty','hospital pharmacist')
+                ->get()
+                ->makeHidden(['created_at', 'updated_at', 'deleted_at','clinic_id','email','experience','username']);
+        }
 
         $doctors->each(function ($doctor) {
             $doctor->clinic->makeHidden(['created_at', 'updated_at', 'deleted_at','address','city_id','district_id','phone','id']);

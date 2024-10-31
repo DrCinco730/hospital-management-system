@@ -210,7 +210,14 @@ class VaccineController
             // ->where('doctor_id', $doctorId)
             ->whereNotIn('status', ['cancelled', 'Done'])
             ->where('type', 'vaccine')
-            ->delete();
+            ->get();
+
+        if ($appointment->isNotEmpty()) {
+            // Delete each appointment
+            foreach ($appointment as $appointment) {
+                $appointment->delete();
+            }
+        }
 
         if ($appointment) {
             return redirect()->intended('home')->with([

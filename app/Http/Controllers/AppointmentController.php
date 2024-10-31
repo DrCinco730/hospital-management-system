@@ -16,6 +16,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use function PHPSTORM_META\map;
 
 class AppointmentController extends Controller
 {
@@ -192,9 +193,9 @@ class AppointmentController extends Controller
      * Store patient symptoms.
      *
      * @param Request $request
-     * @return RedirectResponse
+     * @return View
      */
-    public function storePatientSymptoms(Request $request): RedirectResponse
+    public function storePatientSymptoms(Request $request): View
     {
         $appointmentDetails = $this->checkAppointment();
         $path = "{$this->rootRoute}/cancel-appointment";
@@ -273,13 +274,21 @@ class AppointmentController extends Controller
         $user = Auth::user();
         // $doctorId = session()->get('doctor_id');
 
-        $appointment = Appointment::where('patient_id', $user->id)
+        // Retrieve active appointments for the user
+        $appointments = Appointment::where('patient_id', $user->id)
             // ->where('doctor_id', $doctorId)
             ->whereNotIn('status', ['cancelled', 'Done'])
             ->where('type', 'normal')
-            ->delete();
+            ->get();
 
-        if ($appointment) {
+        // Check if there are any appointments to cancel
+        if ($appointments->isNotEmpty()) {
+            // Delete each appointment
+            foreach ($appointments as $appointment) {
+                $appointment->delete();
+            }
+
+            // Delete related patient symptoms
             PatientSymptom::where('user_id', $user->id)->delete();
 
             return redirect()->intended('home')->with([
@@ -289,10 +298,11 @@ class AppointmentController extends Controller
         }
 
         return redirect()->back()->with([
-            'error' => false,
+            'error' => true,
             'message' => 'No active appointment found.',
         ]);
     }
+
 
     /**
      * Show clinics.

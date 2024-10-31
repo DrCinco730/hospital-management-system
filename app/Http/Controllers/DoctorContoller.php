@@ -17,7 +17,7 @@ class DoctorContoller extends Controller
             $query->latest()->limit(1); // Limit to latest symptom
         }])
             ->where('status', 'Pending')
-//            ->where('doctor_id', $user->id)
+            ->where('doctor_id', $user->id)
             ->orderBy('appointment_date') // Ensures appointments are sorted by date in the DB
             ->get()
             ->map(function ($item) {
