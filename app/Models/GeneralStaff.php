@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\DetectsRelationships;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class GeneralStaff extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory,DetectsRelationships;
 
     protected $table = 'general_staff';
 

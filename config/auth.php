@@ -56,6 +56,10 @@ return [
             'driver' => 'session',
             'provider' => 'general_staffs',
         ],
+        'pharmacy_staff' => [
+            'driver' => 'session',
+            'provider' => 'pharmacy_staff',
+        ],
     ],
 
 
@@ -96,6 +100,10 @@ return [
         'general_staffs' => [
             'driver' => 'eloquent',
             'model' => App\Models\GeneralStaff::class,
+        ],
+        'pharmacy_staff' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\PharmacyStaff::class,
         ],
     ],
 

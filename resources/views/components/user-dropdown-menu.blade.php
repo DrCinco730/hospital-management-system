@@ -15,7 +15,12 @@
             </div>
         </div>
         <div class="dropdown-options">
-            <a href="#" class="dropdown-option">Account Settings</a>
+            @php
+            $type = \App\Services\Login\LoginService::typeOfUser()
+            @endphp
+            @if($type === 'user')
+            <a href="/user/edit" class="dropdown-option">Account Settings</a>
+            @endif
             <a href="#" class="dropdown-option logout" onclick="goToLogout()">Log Out</a>
         </div>
     </div>

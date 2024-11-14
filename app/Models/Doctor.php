@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
 
+use App\Traits\DetectsRelationships;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 
 class Doctor extends Authenticatable
 {
-    use SoftDeletes,HasFactory;
+    use SoftDeletes,HasFactory,DetectsRelationships;
 
 
     protected $fillable = [
@@ -28,6 +29,9 @@ class Doctor extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'updated_at',
+        'deleted_at',
+        'created_at'
     ];
 
 
@@ -116,6 +120,11 @@ class Doctor extends Authenticatable
     public function specialty_name(): BelongsTo
     {
         return $this->belongsTo(Specialty::class, 'specialty', 'name');
+    }
+
+    public function pharmacy_appointment(): HasMany
+    {
+        return $this->hasMany(PharmacyAppointment::class);
     }
 
 }

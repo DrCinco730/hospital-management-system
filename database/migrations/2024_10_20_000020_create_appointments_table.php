@@ -35,14 +35,14 @@ return new class extends Migration
             // If you need to store time as well, consider using dateTime
 //             $table->dateTime('appointment_datetime');
 
-            $table->enum('status', ['Pending', 'Done', 'Cancelled'])->default('Pending');
+            $table->enum('status', ['Pending', 'Done', 'Cancelled','Completed',"ToPharmacy"])->default('Pending');
             $table->enum('type', ['normal', 'vaccine', 'medicine'])->default('normal');
             $table->text('notes')->nullable();
+//            $table->unique(['appointment_date', 'time_id', 'doctor_id'], 'unique_pending_status')
+//                ->whereIn('status', ['Pending', 'Done','Completed',"ToPharmacy"]);
+//
 
-            $table->unique(
-                ['patient_id', 'doctor_id', 'appointment_date', 'time_id'],
-                'unique_patient_doctor_date_time'
-            );
+            $table->softDeletes();
 
 
 

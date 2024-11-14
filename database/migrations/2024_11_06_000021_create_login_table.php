@@ -12,25 +12,28 @@ return new class extends Migration
     {
         DB::statement("
             CREATE VIEW login_view AS
-            SELECT id, username, password, 'user' AS type
+            SELECT id, username, password,email, 'user' AS type
             FROM users
             WHERE deleted_at IS NULL
             UNION
-            SELECT id, username, password, 'admin' AS type
+            SELECT id, username, password,email, 'admin' AS type
             FROM admins
             WHERE deleted_at IS NULL
             UNION
-            SELECT id, username, password, 'nurse' AS type
+            SELECT id, username, password,email, 'nurse' AS type
             FROM nurses
             WHERE deleted_at IS NULL
             UNION
-            SELECT id, username, password, 'staff' AS type
+            SELECT id, username, password,email, 'staff' AS type
             FROM general_staff
             WHERE deleted_at IS NULL
             UNION
-            SELECT id, username, password, 'doctor' AS type
+            SELECT id, username, password,email, 'doctor' AS type
             FROM doctors
             WHERE deleted_at IS NULL
+            UNION
+            SELECT id, username, password,email, 'pharmacy_staff' AS type
+            FROM pharmacy_staff
         ");
     }
 

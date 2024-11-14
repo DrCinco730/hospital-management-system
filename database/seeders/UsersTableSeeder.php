@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Doctor;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -93,7 +94,8 @@ class UsersTableSeeder extends Seeder
                 'updated_at' => '2024-10-01 04:12:15'
             ],
         ]);
-        User::factory()->count(50)->create();
+        $count = Doctor::all()->count();
+        User::factory()->count($count*10)->create();
 
     }
 }

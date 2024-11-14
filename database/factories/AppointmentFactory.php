@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\Appointment;
 use App\Models\Clinic;
 use App\Models\Doctor;
+use App\Models\DoctorSlot;
 use App\Models\PatientSymptom;
 use App\Models\Symptom;
 use App\Models\TimeSlot;
@@ -15,66 +16,109 @@ use Illuminate\Support\Carbon;
 class AppointmentFactory extends Factory
 {
     protected $model = Appointment::class;
+    protected static $test = [];
 
+    /**
+     * @throws \Exception
+     */
     public function definition(): array
     {
-        // اختيار عيادة عشوائية
-        $clinic = Clinic::inRandomOrder()->first();
+        $today = Carbon::today('+3');
+        $dateOption = $this->faker->randomElement(['past', 'today', 'future']);
+        $appointmentDate = $this->getAppointmentDate($dateOption, $today);
 
-        // اختيار طبيب عشوائي مرتبط بالعيادة
+        $clinic = Clinic::inRandomOrder()->first();
         $doctor = Doctor::where('clinic_id', $clinic->id)->inRandomOrder()->first();
 
-        // اختيار مريض عشوائي
-        $patient = User::inRandomOrder()->first();
-
-        // اختيار الأعراض وتحديد مستوى الخطورة
-        $symptomCount = $this->faker->numberBetween(1, 3);
-        $symptoms = Symptom::inRandomOrder()->limit($symptomCount)->get();
-
-        // تحديد مستوى الخطورة بناءً على الأعراض الطارئة
-        $hasEmergency = $symptoms->contains('is_emergency', 1);
-        $level = $hasEmergency ? 3 : ($symptomCount > 1 ? 2 : 1);
-
-        // إعداد أسماء الأعراض
-        $symptomNames = $symptoms->pluck('name')->toArray();
-
-        // تحديد الأوقات المتاحة بناءً على مستوى الخطورة
-        $severityTimeFrames = [
-            3 => ['start' => '08:00:00', 'end' => '12:00:00'],
-            2 => ['start' => '12:00:00', 'end' => '15:00:00'],
-            1 => ['start' => '15:00:00', 'end' => '17:00:00'],
-        ];
-
-        $startTime = $severityTimeFrames[$level]['start'];
-        $endTime = $severityTimeFrames[$level]['end'];
-
-        // اختيار خانة زمنية متاحة بناءً على مستوى الخطورة
-        $timeSlot = TimeSlot::whereBetween('start_time', [$startTime, $endTime])
-            ->inRandomOrder()
-            ->first();
-
-        if (!$clinic || !$doctor || !$patient || !$timeSlot) {
-            throw new \Exception("Missing required data for Appointment factory.");
+        if (!$clinic || !$doctor) {
+            throw new \Exception("Clinic or doctor is unavailable for appointment.");
         }
 
-        // تحديد تاريخ الموعد
-        $appointmentDate = $this->faker->dateTimeBetween('now', '+1 month')->format('Y-m-d');
+        $patient = User::inRandomOrder()->first();
+        if (!$patient) {
+            throw new \Exception("No unique patient available.");
+        }
 
-        // إنشاء سجل للأعراض المرتبطة بالمريض
-        PatientSymptom::create([
-            'user_id' => $patient->id,
-            'symptoms' => json_encode($symptomNames),
-            'level' => $level,
-        ]);
+        $symptoms = $this->getSymptoms();
+        $severityLevel = $this->determineSeverityLevel($symptoms);
+
+        if (!in_array($doctor->specialty, ['hospital pharmacist', 'Vaccination Specialist'])) {
+            $this->createPatientSymptom($patient->id, $symptoms, $severityLevel);
+        }
 
         return [
             'doctor_id' => $doctor->id,
             'patient_id' => $patient->id,
-            'time_id' => $timeSlot->id,
-            'appointment_date' => $appointmentDate,
-            'status' => 'Pending',
-            'type' => 'normal' ,
+            'time_id' => null,
+            'appointment_date' => Carbon::parse($appointmentDate)->format('Y-m-d'),
+            'status' => null,
+            'type' => 'normal',
             'notes' => $this->faker->optional()->sentence,
         ];
+    }
+
+    private function getAppointmentDate(string $dateOption, Carbon $today): \DateTime|Carbon
+    {
+        return match ($dateOption) {
+            'past' => $this->faker->dateTimeBetween('-1 month', '-1 day'),
+            'today' => $today,
+            'future' => $this->faker->dateTimeBetween('+1 day', '+1 month'),
+        };
+    }
+
+    private function getSymptoms()
+    {
+        $symptomCount = $this->faker->numberBetween(1, 3);
+        return Symptom::select(['name', 'is_emergency'])
+            ->inRandomOrder()
+            ->limit($symptomCount)
+            ->get();
+    }
+
+
+    private function determineSeverityLevel($symptoms): int
+    {
+        $hasEmergency = $symptoms->contains('is_emergency', 1);
+        return $hasEmergency ? 3 : ($symptoms->count() > 1 ? 2 : 1);
+    }
+
+    private function createPatientSymptom(int $patientId, $symptoms, int $severityLevel): void
+    {
+        $mm = $symptoms->pluck('name')->toArray();
+        PatientSymptom::create([
+            'user_id' => $patientId,
+            'symptoms' => json_encode($mm),
+            'level' => $severityLevel,
+        ]);
+    }
+
+    private function getSpecialtyTimeSlots(int $doctorId, $appointmentDate): array
+    {
+        $day = Carbon::parse($appointmentDate)->format('l');
+        $times = DoctorSlot::where('doctor_id', $doctorId)
+            ->where('day', $day)
+            ->get();
+
+        return $times->isNotEmpty()
+            ? [$times->first()->start_time, $times->last()->end_time]
+            : ['08:00:00', '17:00:00'];
+    }
+
+    public function withDate(string $dateOption): static
+    {
+        $appointmentDate = $this->getAppointmentDate($dateOption, Carbon::today("+3"));
+        return $this->state([
+            'appointment_date' => Carbon::parse($appointmentDate)->format('Y-m-d'),
+        ]);
+    }
+
+    public function withType(string $type): static
+    {
+        return $this->state(['type' => $type]);
+    }
+
+    public function withUserId(int $patientId): static
+    {
+        return $this->state(['patient_id' => $patientId]);
     }
 }

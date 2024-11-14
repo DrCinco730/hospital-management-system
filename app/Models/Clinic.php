@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
 
+use App\Traits\DetectsRelationships;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Clinic extends Model
 {
-    use HasFactory,softDeletes;
+    use HasFactory,softDeletes,DetectsRelationships;
     protected $table = 'clinics';
 
 
@@ -20,6 +21,12 @@ class Clinic extends Model
         'district_id',
         'address',
         'phone',
+    ];
+
+    protected $hidden = [
+        'updated_at',
+        'deleted_at',
+        'created_at'
     ];
 
 
@@ -51,4 +58,13 @@ class Clinic extends Model
     {
         return $this->hasMany(GeneralStaff::class);
     }
+
+    protected static function booted()
+    {
+        static::created(function ($clinic) {
+            Pharmacy::create([
+                'clinic_id' => $clinic->id,
+            ]);
+        });
+        }
 }

@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\DoctorContoller;
+use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\MedicationController;
+use App\Http\Controllers\MidicationPharmacyController;
 use App\Http\Controllers\NurseController;
+use App\Http\Controllers\PharmacyStaffController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\VaccineController;
 use App\Http\Middleware\AdminMiddleware;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\AppointmentController;
@@ -93,11 +95,11 @@ Route::middleware('auth')->group(function () {
 //
 //});
 
+Route::get("/records", [AdminController::class, 'Records']);
 
 Route::group(['middleware' => ['auth:admin']], function () {
     // Admin Dashboard
     Route::get('/admin', [AdminController::class, 'showAdmin'])->name('admin');
-    Route::get("/records", [AdminController::class, 'Records']);
 
 
     // Clinic-related Routes
@@ -124,10 +126,29 @@ Route::group(['middleware' => ['auth:admin']], function () {
 
     // Bulk delete route
     Route::post('/delete-some', [AdminController::class, 'deleteSome'])->name('delete-some');
+
+    Route::get("report/{clinicId}", [AdminController::class , "generateReports"]);
 });
+Route::get("check",[AppointmentController::class , "checkAppointment"]);
+Route::get('/user/edit', [UserController::class, 'editUser'])->name('user.edit');
+
+// Route to handle the form submission
+Route::put('/user/update', [UserController::class, 'updateUser'])->name('user.update');
+
+
+Route::get("lastDate/{clinicId}" , [AdminController::class , "getEndDate"]);
+
 
 Route::group(['middleware' => ['auth:doctor']], function () {
-    Route::get("/doctor",[DoctorContoller::class,'showPatient'])->name("doctor");
+    Route::get("/appointments/", [DoctorController::class, 'showPatient']);
+    Route::post('/appointment/{appointmentId}/transfer-pharmacy', [DoctorController::class, 'transferToPharmacy']);
+    Route::get('/appointment/{appointmentId}/show-transfer-pharmacy', [DoctorController::class, 'showTransferToPharmacy']);
+    Route::get('/appointment/{appointmentId}/finish', [DoctorController::class, 'finish']);
+
+    // Added route for showAppointments
+    Route::get('/appointment/{appointmentId}/show-appointment', [DoctorController::class, 'showAppointment']);
+    Route::get("/medicationsDoctor",[DoctorController::class,'Medication']);
+
 });
 
 
@@ -136,11 +157,10 @@ Route::group(['middleware' => ['auth:nurse']], function () {
 });
 
 Route::group(['middleware' => ['auth:general_staff']], function () {
-    Route::get("/staff",[NurseController::class,'showPatient'])->name("nurse");
+    Route::get("/staff",[NurseController::class,'showPatient'])->name("staff");
 });
 
 Route::get('/account_created',function(){return view("AccountCreated");})->name('account_created');
-
 
 
 
@@ -155,4 +175,26 @@ Route::post('otp/resend', [RegistrationController::class, 'resendOtp'])->name('o
 
 
 Route::get("/success",function(){return view("test");})->name('success');
+
+
+
+Route::prefix('pharmacy')->middleware('auth:pharmacy_staff')->group(function () {
+    Route::get('/dashboard', [PharmacyStaffController::class, 'index'])->name('pharmacy.dashboard');
+    Route::get('/appointments/{appointment}/details', [PharmacyStaffController::class, 'viewAppointmentDetails'])->name('pharmacy.viewAppointmentDetails');
+    Route::put('/appointments/{appointment}/complete', [PharmacyStaffController::class, 'completeAppointment'])->name('pharmacy.completeAppointment');
+    Route::post('/medications/add', [MidicationPharmacyController::class, 'addMedication']);
+    Route::post('/medication/{id}/update', [MidicationPharmacyController::class, 'updateMedication'])->name('medication.update');
+    Route::get('/medication/{id}/delete', [MidicationPharmacyController::class, 'deleteMedication'])->name('medication.delete');
+    Route::get('/appointments/{appointmentId}/cancel', [PharmacyStaffController::class, 'cancel']);
+    Route::get('/appointments/{appointmentId}/finish', [PharmacyStaffController::class, 'done']);
+
+});
+
+
+
+
+
+
+
+
 

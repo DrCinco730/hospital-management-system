@@ -20,6 +20,7 @@ return new class extends Migration
             $table->rememberToken();
 
             $table->integer('experience');
+            $table->timestamps();
             $table->softDeletes(); // Adds deleted_at column for soft deletes
 
 

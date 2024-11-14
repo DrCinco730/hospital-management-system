@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TimeSlot extends Model
 {
@@ -27,4 +28,10 @@ class TimeSlot extends Model
         'created_at',
         'updated_at',
     ];
+
+
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class, 'time_id');
+    }
 }

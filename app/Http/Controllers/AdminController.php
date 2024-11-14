@@ -14,6 +14,8 @@ use App\Models\Record;
 use App\Models\Specialty;
 use App\Models\User;
 use App\Models\Login;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -48,7 +50,7 @@ class AdminController extends Controller
             ->with('success', 'You have successfully logged in.');
     }
 
-    public function ClinicDetails(int $clinic_id,string $page=null)
+    public function ClinicDetails(int $clinic_id,string $page=null , string $data=null)
     {
         $clinics_details = Clinic::with(['doctors','nurses','general_staff','city','district'])->where('id',$clinic_id)->get();
         $clinics_details->makeHidden(['created_at', 'updated_at', 'deleted_at','address','city_id','district_id','phone']);
@@ -67,7 +69,9 @@ class AdminController extends Controller
             })
             ->get();
         $counts = count($appointments);
-//        return response()->json($clinics_details);
+        if($data != null){
+            return response()->json($clinics_details);
+        }
         if($page === 'edit'){
             return view('edit', ['clinics'  => $clinics_details,'counts' => $counts]);
         } else {
@@ -111,17 +115,26 @@ class AdminController extends Controller
             $query->withTrashed(); // Include soft-deleted doctors
         }])
             ->where('doctor_id', $doctor_id)
+            ->orderBy('appointment_date')
             ->get()
+            ->map(function ($item) {
+                $item['start_time'] = $item->timeSlot->start_time;
+                return $item;
+            })
             ->makeHidden(['created_at', 'updated_at', 'deleted_at', 'doctor_id', 'patient_id' ,'time_id']);
 
         $appointments->each(function ($i) {
-            $i->timeSlot->makeHidden(['end_time','duration','id']);
             $i->patient->makeHidden(['created_at', 'updated_at', 'deleted_at','clinic_id','email','username','city_id','district_id','id_number','date_of_birth']);
             $i->doctor->makeHidden(['created_at', 'updated_at', 'deleted_at','clinic_id','email','experience','username','id','specialty']);
 
         });
+
+        $sortedAppointments = $appointments->sortBy([
+            ['appointment_date', 'asc'],
+            ['start_time', 'asc'],
+        ])->values();
 //        return response()->json($appointments);
-        return view('doctorBooking', ['appointments' => $appointments]);
+        return view('doctorBooking', ['appointments' => $sortedAppointments]);
     }
 
     /**
@@ -525,10 +538,94 @@ class AdminController extends Controller
 
     public function records()
     {
-        $record = Record::all()->reverse();
+        $records = Record::with('entity')
+            ->where('status', 'unread')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+        $count_notification = Record::where("status","unread")->count();
 
-        Record::where('status', '!=', 'read')->update(['status' => 'read']);
-        //        return response()->json($record);
-        return view("notification",compact('record'));
+
+        // 10 items per page
+
+//
+
+        foreach ($records as $record) {
+            $record->status = 'read';
+            $record->save(); // Save the updated record to the database
+        }
+//        return response()->json($records->first());
+        return view("notification",['record' => $records , 'count_notification' => $count_notification]);
+    }
+
+
+//    public function getReport($clinicId)
+//    {
+//        $details = $this->ClinicDetails($clinicId , data: "json")->getOriginalContent();
+////        $doctors = $details->get();
+//        return response()->json($details[0]["doctors"]);
+//    }
+
+
+    public function generateReports(Request $request , int $clinicId)
+    {
+        $startDate = $request->query('startDate');
+        $endDate = $request->query('endDate');
+        // جلب الأطباء المرتبطين بالعيادة
+        $getDoctors = Doctor::withoutTrashed()
+            ->where('clinic_id', $clinicId)
+            ->get()->pluck('id')->toArray();
+
+        // جلب تفاصيل المواعيد المرتبطة بالأطباء المذكورين
+        $appointmentDetails = Appointment::with(['doctor.clinic', 'timeSlot'])
+            ->where('appointment_date', '>=', $startDate)
+            ->where('appointment_date', '<=', $endDate)
+            ->onlyTrashed()
+            ->withoutGlobalScope('notDeleted')
+            ->whereIn('doctor_id', $getDoctors)
+
+            ->get();
+        $doctors = $appointmentDetails->groupBy('doctor_id')->map(function ($appointments, $doctor_id) {
+            $doctor = $appointments->first()->doctor;
+            return [
+                'doctor' => $doctor,
+                'appointments' => $appointments
+            ];
+        });
+
+        // تصنيف المواعيد حسب الحالة
+        $statuses = [
+            'Done' => $appointmentDetails->where('status', 'Done'),
+            'ToPharmacy' => $appointmentDetails->where('status', 'ToPharmacy'),
+            'Completed' => $appointmentDetails->where('status', 'Completed'),
+            'Cancelled' => $appointmentDetails->where('status', 'Cancelled'),
+        ];
+
+        $data = [
+            'doctors' => $doctors,
+            'statuses' => $statuses,
+        ];
+
+//        return response()->json($appointmentDetails);
+
+        // توليد ملف PDF من العرض
+        $pdf = PDF::loadView('temp', $data)->setPaper('a4', 'portrait');
+////
+////        // تحميل الـ PDF
+        return $pdf->download('temp'.'.pdf');
+    }
+
+
+    public function getEndDate(int $clinicId)
+    {
+        $appointment = Appointment::with('doctor')
+            ->withTrashed()
+            ->withoutGlobalScope('notDeleted')
+            ->whereHas('doctor', function ($query) use ($clinicId) {
+                $query->where('clinic_id', $clinicId);
+            })
+            ->orderBy('appointment_date')
+            ->get(['appointment_date'])->first()->makeHidden('doctor');
+
+        return response()->json($appointment);
     }
 }

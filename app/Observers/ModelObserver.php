@@ -15,16 +15,43 @@ class ModelObserver
     public function logEvent($model, string $event, string $action): void
     {
         try {
+
+            if (method_exists($model, 'getAllRelationships')) {
+                $relationships = $model->getAllRelationships();
+                $model->load($relationships);
+            }
+
+            // Get all attributes
+            $att = $model->getAttributes();
+
+// Define the attributes to remove
+            $removeKeys = ['password', 'remember_token', 'created_at', 'updated_at', 'deleted_at'];
+
+// Remove unwanted keys if they exist
+            foreach ($removeKeys as $key) {
+                unset($att[$key]);
+            }
+
+// Or, alternatively:
+            $att = array_diff_key($att, array_flip($removeKeys));
+
+
+
+
+
+
+            // Gather metadata, now including relationsh
+
             // Gather meta data
             $metaData = [
-                'attributes' => $model->getAttributes(),
+                'attributes' => $att,
                 'changes' => $model->getChanges(),
                 'original' => $model->getOriginal(),
             ];
 
             // Capture request context if available
             $context = null;
-            if (app()->runningInConsole() === false) {
+            if (!app()->runningInConsole()) {
                 $context = [
                     'ip_address' => Request::ip(),
                     'user_agent' => Request::header('User-Agent'),

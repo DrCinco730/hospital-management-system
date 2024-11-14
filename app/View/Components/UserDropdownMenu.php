@@ -2,13 +2,11 @@
 
 namespace App\View\Components;
 
-use AllowDynamicProperties;
 use App\Services\Login\LoginService;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-#[AllowDynamicProperties]
 class UserDropdownMenu extends Component
 {
     public string $name;
@@ -17,16 +15,17 @@ class UserDropdownMenu extends Component
     /**
      * Create a new component instance.
      */
-    public function __construct(protected LoginService $loginService)
+    public function __construct()
     {
-        $user = $this->loginService->isAuthenticatedAcrossGuards();
+        $user = LoginService::isAuthenticatedAcrossGuards();
+        $type = LoginService::typeOfUser();
 
-        if ($user) {
+        if($type === 'user'){
             $this->name = $user->first_name . ' ' . $user->last_name ?? $user->name ?? 'Guest';
             $this->email = $user->email ?? 'Not provided';
         } else {
-            $this->name = 'Guest';
-            $this->email = 'Not provided';
+            $this->name = $user->name ?? 'Guest';
+            $this->email = $user->email ?? 'Not provided';
         }
     }
 

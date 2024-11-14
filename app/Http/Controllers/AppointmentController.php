@@ -69,7 +69,7 @@ class AppointmentController extends Controller
         $endDate = $today->copy()->addMonth();
 
         $appointments = Appointment::where('doctor_id', $doctorId)
-            ->whereNotIn('status', ['Cancelled', 'Done'])
+            ->where('status', value: 'Pending')
             ->whereBetween('appointment_date', [$today, $endDate])
             ->get(['appointment_date', 'time_id']);
 
@@ -177,14 +177,31 @@ class AppointmentController extends Controller
         $appointmentDate = Carbon::parse($validatedData['appointment_date']);
         $doctorId = $request->session()->get('doctor_id');
 
-        Appointment::create([
+        $appointment = Appointment::where([
             'doctor_id' => $doctorId,
             'patient_id' => $user->id,
             'appointment_date' => $appointmentDate,
             'type' => 'normal',
             'time_id' => $timeSlot->id,
-            'status' => 'Pending',
-        ]);
+        ])
+            ->where('status', 'cancelled')
+            ->latest()->first();
+
+        if ($appointment) {
+            $appointment->restore();
+            $appointment->update(['status' => 'Pending']);
+        } else {
+            Appointment::create([
+                'doctor_id' => $doctorId,
+                'patient_id' => $user->id,
+                'appointment_date' => $appointmentDate,
+                'type' => 'normal',
+                'time_id' => $timeSlot->id,
+                'status' => 'Pending',
+            ]);
+
+        }
+
 
         return redirect()->route('success')->with('success', 'Your appointment has been successfully booked!');
     }
@@ -247,18 +264,21 @@ class AppointmentController extends Controller
 
         // Delete past appointments that are not done
         Appointment::where('appointment_date', '<', $todayDate)
-            ->where('status', '!=', 'done')
+            ->where('status', value:  'Pending')
+            ->update(['status' => 'Completed']);
+        Appointment::where("status","Completed")->whereNull("deleted_at")
             ->delete();
 
         // Delete today's appointments that have passed the current time and are not done
         $todaysAppointments = Appointment::where('appointment_date', $todayDate)
-            ->where('status', '!=', 'done')
+            ->where('status', "Pending")
             ->get();
 
         foreach ($todaysAppointments as $appointment) {
             $timeSlot = TimeSlot::find($appointment->time_id);
 
             if ($timeSlot && $timeSlot->end_time <= $currentTime) {
+                $appointment->update(['status' => 'Completed']);
                 $appointment->delete();
             }
         }
@@ -277,7 +297,7 @@ class AppointmentController extends Controller
         // Retrieve active appointments for the user
         $appointments = Appointment::where('patient_id', $user->id)
             // ->where('doctor_id', $doctorId)
-            ->whereNotIn('status', ['cancelled', 'Done'])
+            ->where('status', 'Pending')
             ->where('type', 'normal')
             ->get();
 
@@ -285,22 +305,17 @@ class AppointmentController extends Controller
         if ($appointments->isNotEmpty()) {
             // Delete each appointment
             foreach ($appointments as $appointment) {
+                $appointment->update(['status' => 'Cancelled']);
                 $appointment->delete();
             }
 
             // Delete related patient symptoms
             PatientSymptom::where('user_id', $user->id)->delete();
 
-            return redirect()->intended('home')->with([
-                'success' => true,
-                'message' => 'Appointment cancelled successfully.',
-            ]);
+            return redirect()->intended('home')->with('success', 'Appointment cancelled successfully.');
         }
 
-        return redirect()->back()->with([
-            'error' => true,
-            'message' => 'No active appointment found.',
-        ]);
+        return redirect()->back()->with('error','No active appointment found.');
     }
 
 
@@ -339,11 +354,7 @@ class AppointmentController extends Controller
     public function showDoctor(int $clinicId): View
     {
         $appointmentDetails = $this->checkAppointment();
-        $path = "{$this->rootRoute}/cancel-appointment";
 
-        if ($appointmentDetails) {
-            return view('AppointmentDetails', compact('appointmentDetails', 'path'));
-        }
 
         $doctors = Doctor::withoutTrashed()
             ->where('clinic_id', $clinicId)
@@ -376,7 +387,7 @@ class AppointmentController extends Controller
     /**
      * Check for existing appointment.
      *
-     * @return array|bool
+     * @return \Illuminate\Http\JsonResponse
      */
     public function checkAppointment()
     {
@@ -384,8 +395,8 @@ class AppointmentController extends Controller
         $user = Auth::user();
 
         $appointmentDetails = Appointment::with(['doctor.clinic', 'timeSlot'])
-            ->where('status', 'Pending')
-            ->where('type', 'normal')
+            ->where('status',  '=','Pending')
+            ->where('type', '=', 'normal')
             ->where('patient_id', $user->id)
             ->get()
             ->map(function ($appointment) {
@@ -396,15 +407,17 @@ class AppointmentController extends Controller
                     'clinic' => $appointment->doctor->clinic->name,
                 ];
             })
-            ->first();
+            ->last();
 
         if ($appointmentDetails) {
             $symptoms = PatientSymptom::where('user_id', $user->id)->pluck('symptoms');
-            $appointmentDetails['symptoms'] = $symptoms->isNotEmpty() ? json_decode($symptoms->first(), true) : [];
+            $appointmentDetails['symptoms'] = $symptoms->isNotEmpty() ? json_decode($symptoms->last(), true) : [];
 
             return $appointmentDetails;
         }
 
         return false;
     }
+
+
 }

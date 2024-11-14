@@ -22,7 +22,7 @@
 </button>
 <div class="wrapper">
     <div class="appointment-box">
-        <h2>Appointment Details</h2>
+        <h2>xmppAppointment Details</h2>
         <div class="appointment-details">
             <p><span>Clinic Name:</span> {{ $appointmentDetails['clinic'] }}</p>
             <p><span>Doctor Name:</span> {{ $appointmentDetails['doctor'] }}</p>

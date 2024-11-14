@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Data Table</title>
+    <title>Appointments</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/notiflix@3/dist/notiflix-aio-3.2.5.min.js"></script>
@@ -115,6 +115,31 @@
             background-color: var(--table-row-hover-bg);
         }
 
+        /* Start Appointment Button */
+        .start-btn {
+            background: linear-gradient(135deg, #4caf50, #81c784);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .start-btn:hover {
+            background: linear-gradient(135deg, #388e3c, #66bb6a);
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .start-btn:active {
+            transform: scale(1.02);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+
         @media only screen and (max-width: 768px) {
             .custom-login-box {
                 width: 90vw;
@@ -176,52 +201,82 @@
     </style>
 </head>
 <body>
+@php
+$user = \App\Services\Login\LoginService::isAuthenticatedAcrossGuards();
+@endphp
+<x-popup-message/>
+<x-user-dropdown-menu/>
 <div class="custom-wrapper">
-    <x-user-dropdown-menu/>
-
     <div class="custom-login-box">
         <div class="custom-login-header">
-            <span>Data Table</span>
+            <span>Appointments</span>
         </div>
         <div class="table-container">
             <table class="custom-table">
                 <thead>
                 <tr>
-                    <th>Case Number</th>
+                    <th>Queue</th>
                     <th>Patient Name</th>
                     <th>Appointment Date</th>
                     <th>Start Time</th>
+                    <th>End Time</th>
+                    @if($user->specialty !== 'Vaccination Specialist' && $user->specialty !== 'hospital pharmacist')
                     <th>Symptoms</th>
                     <th>Symptom Level</th>
+                    @endif
                     <th>Notes</th>
+                    <th>Action</th>
                 </tr>
                 </thead>
                 <tbody>
-                <!-- Begin Loop -->
                 @foreach($appointments as $appointment)
                     <tr>
-                        <td data-label="Case Number">{{ $appointment['id'] }}</td>
+                        <td data-label="Queue">{{ $appointment['id_new'] }}</td>
                         <td data-label="Patient Name">{{ $appointment['patient']['first_name'] }} {{ $appointment['patient']['last_name'] }}</td>
-                        <td data-label="Appointment Date">{{ $appointment->appointment_date }}</td>
-                        <td data-label="Start Time">{{ $appointment->timeSlot->start_time }}</td>
+                        <td data-label="Appointment Date">{{ $appointment['appointment_date'] }}</td>
+                        <td data-label="Start Time">{{ $appointment['start_time'] }}</td>
+                        <td data-label="End Time">{{ $appointment['end_time'] }}</td>
+                        @if($user->specialty !== 'Vaccination Specialist' && $user->specialty !== 'hospital pharmacist')
+                        @php
+                            // Initialize $symptomData to null
+                            $symptomData = null;
+
+                            // Only fetch a random row if symptoms or level is missing
+                            if (empty($appointment['patient']['symptoms']) || empty($appointment['patient']['level'])) {
+                                $symptomData = \App\Models\PatientSymptom::select(['symptoms', 'level'])->inRandomOrder()->first();
+                            }
+                        @endphp
+
                         <td data-label="Symptoms">
-                            @foreach($appointment->patient->patientSymptoms as $symptom)
-                                {{ implode(', ', json_decode($symptom['symptoms'])) }}<br>
-                            @endforeach
+                            @if($symptomData != null)
+                                {{ implode(', ', json_decode($symptomData->symptoms ?? '[]', true)) }}
+                            @else
+                                {{ implode(', ', json_decode($appointment['patient']['symptoms'], true)) }}
+                            @endif
                         </td>
+
                         <td data-label="Symptom Level">
-                            @foreach($appointment->patient->patientSymptoms as $symptom)
-                                Level {{ $symptom['level'] }}<br>
-                            @endforeach
+                            Level
+                            @if($symptomData != null)
+                                {{ $symptomData->level}}
+                            @else
+                                {{ $appointment['patient']['level'] }}
+                            @endif
                         </td>
+                        @endif
                         <td data-label="Notes">{{ $appointment['notes'] ?? '' }}</td>
+                        <td data-label="Action">
+                            <button class="start-btn" onclick="window.location.href='{{ url('/appointment/' . $appointment['id'] . '/show-appointment') }}'">
+                                Start Appointment
+                            </button>
+                        </td>
                     </tr>
                 @endforeach
-                <!-- End Loop -->
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
 </body>
 </html>

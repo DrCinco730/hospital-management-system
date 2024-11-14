@@ -35,6 +35,6 @@ class Record extends Model
      */
     public function entity()
     {
-        return $this->morphTo(null, 'entity_type', 'entity_id');
+        return $this->morphTo();
     }
 }

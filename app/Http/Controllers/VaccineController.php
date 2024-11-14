@@ -154,14 +154,29 @@ class VaccineController
         $appointmentDate = Carbon::parse($validatedData['appointment_date']);
         $doctorId = $request->session()->get('doctor_id');
 
-        Appointment::create([
+        $appointment = Appointment::where([
             'doctor_id' => $doctorId,
             'patient_id' => $user->id,
             'appointment_date' => $appointmentDate,
             'type' => 'vaccine',
             'time_id' => $timeSlot->id,
-            'status' => 'Pending',
-        ]);
+        ])
+            ->where('status', 'cancelled')
+            ->latest()->first();
+
+        if ($appointment) {
+            $appointment->restore();
+            $appointment->update(['status' => 'Pending']);
+        } else {
+            Appointment::create([
+                'doctor_id' => $doctorId,
+                'patient_id' => $user->id,
+                'appointment_date' => $appointmentDate,
+                'type' => 'vaccine',
+                'time_id' => $timeSlot->id,
+                'status' => 'Pending',
+            ]);
+        }
 
         return redirect()->route('success')->with('success', 'Your appointment has been successfully booked!');
     }
@@ -179,18 +194,22 @@ class VaccineController
 
         // Delete past appointments that are not done
         Appointment::where('appointment_date', '<', $todayDate)
-            ->where('status', '!=', 'done')
+            ->where('status', value:  'Pending')
+            ->update(['status' => 'Completed']);
+        Appointment::where("status","Completed")
+            ->whereNull("deleted_at")
             ->delete();
 
         // Delete today's appointments that have passed the current time and are not done
         $todaysAppointments = Appointment::where('appointment_date', $todayDate)
-            ->where('status', '!=', 'done')
+            ->where('status', "Pending")
             ->get();
 
         foreach ($todaysAppointments as $appointment) {
             $timeSlot = TimeSlot::find($appointment->time_id);
 
             if ($timeSlot && $timeSlot->end_time <= $currentTime) {
+                $appointment->update(['status' => 'Completed']);
                 $appointment->delete();
             }
         }
@@ -208,7 +227,7 @@ class VaccineController
 
         $appointment = Appointment::where('patient_id', $user->id)
             // ->where('doctor_id', $doctorId)
-            ->whereNotIn('status', ['cancelled', 'Done'])
+            ->where('status', '=','Pending')
             ->where('type', 'vaccine')
             ->get();
 
@@ -220,16 +239,14 @@ class VaccineController
         }
 
         if ($appointment) {
-            return redirect()->intended('home')->with([
-                'success' => true,
-                'message' => 'Appointment cancelled successfully.',
-            ]);
+            return redirect()->intended('home')->with(
+                'success',
+                'Appointment cancelled successfully.');
         }
 
-        return redirect()->back()->with([
-            'error' => false,
-            'message' => 'No active appointment found.',
-        ]);
+        return redirect()->back()->with(
+            'error','No active appointment found.'
+        );
     }
 
     /**

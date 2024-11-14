@@ -5,7 +5,7 @@
                 // Display success message using Notiflix Report without background color
                 Notiflix.Report.success(
                     'Success!',
-                    '{{ session('message') }}',
+                    '{{ session('success') }}',
                     'OK',
                     {
                         messageMaxLength: 400,

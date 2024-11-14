@@ -361,23 +361,23 @@ table tbody tr:hover {
 
 
 /* Clinic Card Styling */
-.clinic-card {
-    flex: 1 1 190px;
-    /* تقليل الحد الأدنى للعرض إلى 180 بكسل بدلاً من 250 */
-    max-width: 220px;
-    /* تقليل الحد الأقصى للعرض إلى 220 بكسل بدلاً من 300 */
-    min-height: 270px;
-    /* تقليل الحد الأدنى للارتفاع إلى 250 بكسل بدلاً من 350 */
-    border-radius: 15px;
-    background: linear-gradient(145deg, #ffffff, #f9f9f9);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    cursor: pointer;
-}
+/*.clinic-card {*/
+/*    flex: 1 1 190px;*/
+/*    !* تقليل الحد الأدنى للعرض إلى 180 بكسل بدلاً من 250 *!*/
+/*    max-width: 220px;*/
+/*    !* تقليل الحد الأقصى للعرض إلى 220 بكسل بدلاً من 300 *!*/
+/*    min-height: 358px;*/
+/*    !* تقليل الحد الأدنى للارتفاع إلى 250 بكسل بدلاً من 350 *!*/
+/*    border-radius: 15px;*/
+/*    background: linear-gradient(145deg, #ffffff, #f9f9f9);*/
+/*    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);*/
+/*    transition: transform 0.3s ease, box-shadow 0.3s ease;*/
+/*    overflow: hidden;*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    justify-content: space-between;*/
+/*    cursor: pointer;*/
+/*}*/
 
 .details-section {
     display: none;
@@ -946,4 +946,24 @@ select.input-field option {
     vertical-align: middle;
 }
 
+.download-button {
+    margin-top: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 16px; /* نفس حشو زر عرض المعلومات */
+    font-size: 12px; /* نفس حجم خط زر عرض المعلومات */
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.download-button i {
+    margin-right: 5px; /* تباعد الأيقونة عن النص */
+}
+
+.download-button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
 

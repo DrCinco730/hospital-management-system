@@ -34,10 +34,11 @@ class LoginController extends Controller
                 'staff' => 'staff',
                 'nurse' => 'nurse',
                 'user' => 'home',
-                'doctor' => 'doctor',
+                'doctor' => 'appointments',
+                'pharmacy_staff' => 'pharmacy/dashboard',
             ];
 
-            return redirect()->intended($redirectRoutes[$type]);
+            return redirect('/'.$redirectRoutes[$type]);
         }
         return view('auth.login');
     }

@@ -10,7 +10,75 @@
     <script src="https://cdn.jsdelivr.net/npm/notiflix@3/dist/notiflix-aio-3.2.5.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <link rel="stylesheet" href="{{ asset('css/style_admin.css') }}">
+
+    <style>
+        /* General Popup Styling */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            width: 300px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .popup-content h3 {
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .popup-content input[type="text"] {
+            width: 200px;
+            padding: 8px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .popup-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 10px;
+        }
+
+        .popup-button {
+            padding: 8px 15px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            min-width: 100px;
+        }
+
+        .download-btn {
+            background-color: #4da6ff;
+        }
+
+        .close-btn {
+            background-color: #ff6b6b;
+        }
+    </style>
 </head>
 
 <body>
@@ -217,6 +285,14 @@
                             <!-- زر عرض المعلومات -->
                             <!-- Button to show clinic details -->
                             <button class="button show-info-button" data-clinic-id="{{ $clinic['id'] }}">Show Details</button>
+                            <input type="hidden" id="reportUrl-{{ $clinic['id'] }}" value="{{ url('/report/' . $clinic['id']) }}">
+                            <button class="button download-button" onclick="openPopup('{{ $clinic['id'] }}')">
+                                <i class="fa fa-download"></i> Download Report
+                            </button>
+
+
+
+
 
                             <div class="clinic-card-actions">
                                 <!-- زر التعديل -->
@@ -224,6 +300,11 @@
 
                                 <!-- زر الحذف -->
                                 <button class="button delete-button" onclick="deleteClinic('{{ $clinic['name'] }}','{{ $clinic['id'] }}')">Delete</button>
+
+                            </div>
+                            <div class="download-report-container">
+                                <!-- زر تنزيل التقرير -->
+
                             </div>
 
                             <div class="details-section" id="details-{{ $clinic['id'] }}" style="display: none;">
@@ -668,9 +749,147 @@
 
 
 
+
+
+    </div>
+    <div class="popup-overlay" id="popupOverlay" style="display: none;">
+        <div class="popup-content">
+            <h3>Select Report Date Range</h3>
+            <input type="text" id="startDate" placeholder="Start Date" readonly>
+            <input type="text" id="endDate" placeholder="End Date" readonly>
+            <div class="popup-buttons" >
+                <button class="popup-button download-btn" onclick="downloadReport()">Download</button>
+                <button class="popup-button close-btn" onclick="closePopup()">Close</button>
+            </div>
+        </div>
     </div>
 </div>
 
+
+
+<script>
+    let clinicID ;
+
+
+
+    async function fetchDateFromAPI(url) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Error fetching data from API');
+            const data = await response.json();  // تحليل JSON
+            return data.appointment_date;        // استرجاع تاريخ الموعد
+        } catch (error) {
+            console.error("An error occurred:", error);
+            return "today";  // عودة إلى اليوم في حال حدوث خطأ
+        }
+    }
+
+    // جلب التاريخ من API ثم تهيئة حقل نهاية التقرير
+   function dateFormat(idClinicReport) {
+       fetchDateFromAPI(`/lastDate/${idClinicReport}`).then(dateFromAPI => {
+           flatpickr("#startDate", {
+               altInput: true,
+               altFormat: "F j, Y",
+               dateFormat: "Y-m-d",
+               minDate: dateFromAPI,  // الحد الأدنى هو التاريخ المسترجع من API
+               maxDate: "today"
+           });
+           flatpickr("#endDate", {
+               altInput: true,
+               altFormat: "F j, Y",
+               dateFormat: "Y-m-d",
+               minDate: dateFromAPI,  // الحد الأدنى هو التاريخ المسترجع من API
+               maxDate: "today"   // الحد الأقصى هو نفس التاريخ أيضاً
+           });
+       });
+   }
+    // دالة لفتح النافذة المنبثقة
+    function openPopup(ID) {
+        document.getElementById("popupOverlay").style.display = "flex";
+        document.getElementsByClassName("popup-buttons").value = ID;
+        dateFormat(ID);
+    }
+
+    // دالة لإغلاق النافذة المنبثقة
+    function closePopup() {
+        document.getElementById("popupOverlay").style.display = "none";
+    }
+
+
+    // function downloadReport() {
+    //     const startDate = document.getElementById("startDate").value;
+    //     const endDate = document.getElementById("endDate").value;
+    //
+    //     if (!startDate || !endDate) {
+    //         Notiflix.Notify.failure("Please select both start and end dates.");
+    //         return;
+    //     }
+    //
+    //     const url = document.getElementById(`reportUrl-${tempID}`).value;
+    //
+    //     // Make an AJAX request to fetch the PDF with POST request
+    //     fetch(url, {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify({ startDate, endDate })  // Add the dates to the request body
+    //     })
+    //         .then(response => response.blob())
+    //         .then(blob => {
+    //             const downloadUrl = URL.createObjectURL(blob);
+    //             const a = document.createElement('a');
+    //             a.href = downloadUrl;
+    //             a.download = `report_${tempID}.pdf`;
+    //             document.body.appendChild(a);
+    //             a.click();
+    //             document.body.removeChild(a);
+    //             URL.revokeObjectURL(downloadUrl);
+    //         })
+    //         .catch(error => console.error('Error downloading report:', error));
+    //
+    //     closePopup();
+    // }
+
+
+    function downloadReport() {
+        const tempID = document.getElementsByClassName("popup-buttons").value;
+
+        const startDate = document.getElementById("startDate").value;
+        const endDate = document.getElementById("endDate").value;
+
+        if (!startDate || !endDate) {
+            Notiflix.Notify.failure("Please select both start and end dates.");
+            return;
+        }
+
+        const url = `${document.getElementById(`reportUrl-${tempID}`).value}?startDate=${startDate}&endDate=${endDate}`;
+
+        // Make an AJAX request to fetch the PDF
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/pdf',
+            },
+        })
+            .then(response => response.blob())
+            .then(blob => {
+                const downloadUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = `report_${startDate}_${endDate}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(downloadUrl);
+            })
+            .catch(error => console.error('Error downloading report:', error));
+
+        closePopup();
+    }
+
+
+</script>
 <script>
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -792,7 +1011,7 @@
     .clinic-card {
         flex: 1 1 180px;
         max-width: 220px;
-        min-height: 250px;
+        min-height: 358px;
         border-radius: 15px;
         background: linear-gradient(145deg, #ffffff, #f9f9f9);
         box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
@@ -900,14 +1119,59 @@
         margin-top: 10px;
     }
 
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .pagination .page-item {
+        margin: 0 5px;
+    }
+
+    .pagination .page-link {
+        padding: 8px 12px;
+        color: #007bff;
+        text-decoration: none;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+
+    .pagination .page-link:hover {
+        background-color: #f1f1f1;
+    }
+
+
 
 </style>
+
+<script>
+
+    function fetchRecords(page) {
+        $.ajax({
+            url: page,
+            success: function (response) {
+                $('#notificationsSection').html(response).show();
+                showForm('notificationsSection', 'Notifications');
+            }
+        });
+    }
+
+</script>
+
 <script>
     $(document).ready(function() {
         $('.button').on('click', function(event) {
             const targetId = event.target.id;
 
-            if (targetId === 'doctorBook') {
+            if(targetId === "page"){
+                let page = $(this).attr('name')
+
+                fetchRecords(page);
+            }
+
+            else if (targetId === 'doctorBook') {
                 loadDoctorBooking();
             } else if ($(this).hasClass('edit-button')) {
                 const clinicId = $(this).data('clinic-id');
@@ -923,6 +1187,7 @@
                 loadVaccineDoctorBooking();
             }
         });
+
 
         function loadNotifictions(){
             $.get('/records', function(response) {
@@ -982,10 +1247,6 @@
 
 </script>
 
-{{--<script>--}}
-
-
-{{--</script>--}}
 <script>
     $(document).ready(function() {
         // Use event delegation to handle dynamically loaded buttons
@@ -1023,48 +1284,16 @@
 </script>
 {{--<script>--}}
 {{--    $(document).ready(function() {--}}
-{{--        // Use event delegation to handle dynamically loaded buttons--}}
-{{--        $(document).on('click', '.show-info-button', function() {--}}
-{{--            // Get the clinic_id from the button's data attribute--}}
-{{--            const clinicId = $(this).data('clinic-id');--}}
+{{--        $('.a').on('click', function(event) {--}}
+{{--        // event.preventDefault();--}}
+{{--        let page = $(this).attr('href')--}}
+{{--        fetchRecords(page);--}}
+{{--    });--}}
 
-{{--            // Make the AJAX GET request, including the clinic_id in the URL--}}
-{{--            $.ajax({--}}
-{{--                url: `/showClinicDetails/${clinicId}/show`, // dynamically add clinic_id here--}}
-{{--                type: 'GET',--}}
-{{--                success: function(response) {--}}
-{{--                    // Load the returned HTML into the editClinicForm section--}}
-{{--                    $('#showClinicDetails').html(response).show();--}}
-{{--                    showForm('showClinicDetails', 'Clinic Staff Overview');--}}
-{{--                },--}}
-{{--                error: function(xhr) {--}}
-{{--                    alert('Error loading clinic details. Please try again.');--}}
-{{--                }--}}
-{{--            });--}}
-{{--        });--}}
-{{--    });--}}
+{{--   --}}
+
 {{--</script>--}}
-{{--<script>--}}
-{{--    $(document).ready(function() {--}}
-{{--        // Use event delegation to handle dynamically loaded buttons--}}
-{{--        $(document).on('click', '#doctorBook', function() {--}}
-{{--            // Get the clinic_id from the button's data attribute--}}
-{{--            // Make the AJAX GET request, including the clinic_id in the URL--}}
-{{--            $.ajax({--}}
-{{--                url: `/showDoctorDetails`, // dynamically add clinic_id here--}}
-{{--                type: 'GET',--}}
-{{--                success: function(response) {--}}
-{{--                    // Load the returned HTML into the editClinicForm section--}}
-{{--                    $('#showDoctors').html(response).show();--}}
-{{--                    showForm('doctorBooking', 'Doctor Booking');--}}
-{{--                },--}}
-{{--                error: function(xhr) {--}}
-{{--                    alert('Error loading clinic details. Please try again.');--}}
-{{--                }--}}
-{{--            });--}}
-{{--        });--}}
-{{--    });--}}
-{{--</script>--}}
+
 
 </body>
 
