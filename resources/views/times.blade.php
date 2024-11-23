@@ -1,17 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Appointment</title>
+    <title>{{ __('messages.book_appointment') }}</title>
+
     <!-- تضمين Flatpickr للواجهة التاريخية -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="{{ asset('css/style_time22.css') }}">
+    <link rel="stylesheet" href="{{ asset(app()->getLocale() === 'ar' ? 'css/style_time_ar.css' : 'css/style_time22.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     <style>
         body {
             background-image: url("{{ asset('images/backgrond.webp') }}");
-            /* تأكد من مسار الصورة الصحيح */
             background-position: center;
             background-size: cover;
             background-repeat: no-repeat;
@@ -19,60 +21,51 @@
         }
     </style>
 </head>
-<body>
-<x-user-dropdown-menu/>
+
+<body style="direction: {{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }};">
+<x-home />
+<x-user-dropdown-menu />
+
 <div class="wrapper">
     <div class="calendar_box">
         <div class="calendar-header">
-            <h2>Select a Date and Time</h2>
+            <h2>{{ __('messages.select_date_time') }}</h2>
         </div>
         <div id="calendar" class="flatpickr-inline"></div>
         <div id="times-container">
-            <p id="instruction">Select a date to view available times.</p>
+            <p id="instruction">{{ __('messages.select_date_instruction') }}</p>
             <div id="times-list"></div>
         </div>
         <div class="book-btn">
-            <button id="book-now" disabled onclick="submitBooking()"><span>🕒</span> Book Now</button>
+            <button id="book-now" disabled onclick="submitBooking()"><span>🕒</span> {{ __('messages.book_now') }}</button>
         </div>
     </div>
 </div>
 
-
-<form id="booking-form" method="POST" action="{{url($path)}}">
+<form id="booking-form" method="POST" action="{{ url($path) }}">
     @csrf
     <input type="hidden" name="time_slot" id="time_slot_input" value="">
     <input type="hidden" name="appointment_date" id="appointment_date_input" value="">
 </form>
+
 <script>
-    // Initialize availableTimes from controller data
+    // إعداد البيانات
     const availableTimes = @json($availableTimes) ?? {};
     const enabledDates = Object.keys(availableTimes);
 
     let selectedDate = null;
     let selectedTime = null;
 
-    // Get today's date in 'YYYY-MM-DD' format based on local timezone
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    const formattedToday = `${yyyy}-${mm}-${dd}`;
-
+    // تهيئة التقويم
     document.addEventListener('DOMContentLoaded', function () {
         flatpickr("#calendar", {
             altInput: true,
-            altFormat: "F j, Y",
+            altFormat: "{{ app()->getLocale() === 'ar' ? 'F j, Y' : 'F j, Y' }}",
             dateFormat: "Y-m-d",
             inline: true,
             minDate: "today",
-            locale: "en", // Change dynamically if needed
-            enable: enabledDates,
-            disable: [
-                function(date) {
-                    // Disable Saturdays (6) and Sundays (0)
-                    return (date.getDay() === 0 || date.getDay() === 6);
-                }
-            ],
+            locale: "{{ app()->getLocale() }}",
+            enable: enabledDates, // التواريخ المفعّلة فقط
             onChange: function (selectedDates, dateStr) {
                 selectedDate = dateStr;
                 displayAvailableTimes(dateStr);
@@ -86,56 +79,27 @@
         timesList.innerHTML = '';
         selectedTime = null;
         document.getElementById('book-now').disabled = true;
-        document.getElementById('book-now').setAttribute('aria-disabled', 'true');
 
         if (availableTimes[date] && availableTimes[date].slots.length > 0) {
-            instruction.textContent = 'Select a preferred time:';
+            instruction.textContent = "{{ __('messages.select_preferred_time') }}";
 
             availableTimes[date].slots.forEach(slot => {
-                // Disable past slots if the selected date is today
-                if (date === formattedToday) {
-                    const [hour, minute, second] = slot.start_time.split(':').map(Number);
-                    const slotTime = new Date();
-                    slotTime.setHours(hour, minute, second, 0);
-
-                    if (slotTime < today) {
-                        // Skip adding this slot as it's in the past
-                        return;
-                    }
-                }
-
                 const timeElement = document.createElement('button');
                 timeElement.className = 'time-slot';
                 timeElement.innerText = formatTime(slot.start_time);
                 timeElement.setAttribute('type', 'button');
-                timeElement.setAttribute('role', 'option');
-                timeElement.setAttribute('aria-selected', 'false');
-                timeElement.setAttribute('tabindex', '0');
 
                 timeElement.addEventListener('click', function () {
                     clearSelectedSlots();
                     timeElement.classList.add('selected');
-                    timeElement.setAttribute('aria-selected', 'true');
                     selectedTime = slot.start_time;
-                    selectTimeSlot(date, slot.id, slot.start_time);
-                });
-
-                timeElement.addEventListener('keydown', function (e) {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        timeElement.click();
-                    }
+                    selectTimeSlot(date, slot.id);
                 });
 
                 timesList.appendChild(timeElement);
             });
-
-            // Handle case where all slots are in the past
-            if (timesList.children.length === 0) {
-                instruction.textContent = 'No available times for this day.';
-            }
         } else {
-            instruction.textContent = 'No available times for this day.';
+            instruction.textContent = "{{ __('messages.no_available_times') }}";
         }
     }
 
@@ -147,48 +111,29 @@
         return `${formattedHour}:${minute} ${amPm}`;
     }
 
-    function selectTimeSlot(date, timeSlotId, time) {
-        // If using composite ID
-        // const compositeId = `${date}-${timeSlotId}`;
+    function selectTimeSlot(date, timeSlotId) {
         document.getElementById('time_slot_input').value = timeSlotId;
         document.getElementById('appointment_date_input').value = date;
-
         document.getElementById('book-now').disabled = false;
-        document.getElementById('book-now').setAttribute('aria-disabled', 'false');
-        document.getElementById('book-now').focus();
     }
 
     function submitBooking() {
         if (selectedDate && selectedTime) {
-            const formattedTime = formatTime(selectedTime);
-            if (confirm(`Confirm booking on ${selectedDate} at ${formattedTime}?`)) {
+            const confirmationMessage = `{{ __('messages.confirm_booking') }} ${selectedDate} {{ __('messages.at') }} ${selectedTime}`;
+            if (confirm(confirmationMessage)) {
                 document.getElementById('booking-form').submit();
             }
         } else {
-            alert("Please select a date and time before booking.");
+            alert("{{ __('messages.select_date_time_error') }}");
         }
     }
 
     function clearSelectedSlots() {
-        const allTimeSlots = document.querySelectorAll('.time-slot');
-        allTimeSlots.forEach(slot => {
+        document.querySelectorAll('.time-slot').forEach(slot => {
             slot.classList.remove('selected');
-            slot.setAttribute('aria-selected', 'false');
         });
     }
 </script>
-
-<style>
-    div.flatpickr-days div.dayContainer span.flatpickr-day.flatpickr-disabled {
-        color: #161515;
-        /* رمادي للأيام غير المتاحة */
-        opacity: 0.5;
-        cursor: not-allowed;
-        /* عدم السماح بالنقر */
-        pointer-events: none;
-        /* منع التفاعل */
-    }
-</style>
-
 </body>
+
 </html>

@@ -17,22 +17,16 @@ class DoctorSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('doctors')->insert([
-            [
-                'id' => 1,
-                'name' => 'Khaled',
-                'username' => 'Khaled',
-                'email' => 'oodfnksjn@gmail.com',
-                'password' => bcrypt("12345678"),
-                'specialty' => 'Anesthesiology',
-                'clinic_id' => 1,
-                'experience' => 20,
-                'remember_token' => NULL,
-                'created_at' => '2024-10-01 23:07:48',
-                'updated_at' => '2024-10-01 23:07:48'
-            ],
-                ]
-        );
+        Doctor::create([
+            'name' => 'Khaled',
+            'username' => 'Khaled',
+            'email' => 'oodfnksjn@gmail.com',
+            'password' => bcrypt("12345678"),
+            'specialty' => 'Anesthesiology',
+            'clinic_id' => 1,
+            'experience' => 20,
+        ]);
+
         Clinic::with('district')->each(function ($clinic) {
             $population = $clinic->district->population;
 //            $population = $district ? $district->population : 0;

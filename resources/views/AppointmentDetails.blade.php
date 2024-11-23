@@ -1,36 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Appointment Confirmation</title>
+    <title>{{ __('messages.appointment_confirmation') }}</title>
+
+    <!-- خطوط وأيقونات -->
     <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Poppins&display=swap'>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/notiflix@3/dist/notiflix-aio-3.2.5.min.js"></script>
 
-    <link rel="stylesheet" href="{{ asset('css/style_Appointment_Confirmation.css') }}">
+    <!-- ملفات CSS -->
+    @if(app()->getLocale() === 'ar')
+        <link rel="stylesheet" href="{{ asset('css/style_Appointment_Confirmation_ar.css') }}">
+    @else
+        <link rel="stylesheet" href="{{ asset('css/style_Appointment_Confirmation.css') }}">
+    @endif
 </head>
 
-<body>
-<x-popup-message/>
-<x-user-dropdown-menu/>
+<body style="direction: {{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }};">
+<x-popup-message />
+<x-user-dropdown-menu />
+<x-home />
 
-
-<button class="button return-button" onclick="goToHome()">
-    <i class="fas fa-home"></i>
-</button>
 <div class="wrapper">
     <div class="appointment-box">
-        <h2>xmppAppointment Details</h2>
+        <h2>{{ __('messages.appointment_details') }}</h2>
         <div class="appointment-details">
-            <p><span>Clinic Name:</span> {{ $appointmentDetails['clinic'] }}</p>
-            <p><span>Doctor Name:</span> {{ $appointmentDetails['doctor'] }}</p>
-            <p><span>Appointment Date:</span> {{ $appointmentDetails['appointment_date'] }}</p>
-            <p><span>Start Time:</span> {{ $appointmentDetails['start_time'] }}</p>
+            <p><span>{{ __('messages.clinic_name') }}:</span> {{ $appointmentDetails['clinic'] }}</p>
+            <p><span>{{ __('messages.doctor_name') }}:</span> {{ $appointmentDetails['doctor'] }}</p>
+            <p><span>{{ __('messages.appointment_date') }}:</span> {{ $appointmentDetails['appointment_date'] }}</p>
+            <p><span>{{ __('messages.start_time') }}:</span> {{ $appointmentDetails['start_time'] }}</p>
 
             @if(isset($appointmentDetails['symptoms']))
-                <p><span>Symptoms:</span></p>
+                <p><span>{{ __('messages.symptoms') }}:</span></p>
                 <ul>
                     @foreach ($appointmentDetails['symptoms'] as $symptom)
                         <li>{{ $symptom }}</li>
@@ -38,46 +42,42 @@
                 </ul>
             @endif
         </div>
-        <div class="countdown-title">Time Remaining Until Your Appointment:</div>
+        <div class="countdown-title">{{ __('messages.time_remaining') }}</div>
         <div class="countdown-container" id="countdown">
             <div class="countdown-item">
                 <div id="days">0</div>
-                <span>Days</span>
+                <span>{{ __('messages.days') }}</span>
             </div>
             <div class="countdown-item">
                 <div id="hours">0</div>
-                <span>Hours</span>
+                <span>{{ __('messages.hours') }}</span>
             </div>
             <div class="countdown-item">
                 <div id="minutes">0</div>
-                <span>Minutes</span>
+                <span>{{ __('messages.minutes') }}</span>
             </div>
             <div class="countdown-item">
                 <div id="seconds">0</div>
-                <span>Seconds</span>
+                <span>{{ __('messages.seconds') }}</span>
             </div>
         </div>
-        <button class="cancel-appointment-button" id="cancelButton">Cancel Appointment</button>
+        <button class="cancel-appointment-button" id="cancelButton">{{ __('messages.cancel_appointment') }}</button>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/notiflix@3/dist/notiflix-aio-3.2.5.min.js"></script>
 <script>
-    function goToHome() {
-        window.location.href = "/home"; // Change this to your actual home route
-    }
     function cancelAppointment() {
         Notiflix.Confirm.show(
-            'Cancel Appointment',
-            'Do you really want to cancel this appointment?',
-            'Yes, cancel it!',
-            'No, keep it',
+            "{{ __('messages.cancel_appointment') }}",
+            "{{ __('messages.confirm_cancel_appointment') }}",
+            "{{ __('messages.yes_cancel') }}",
+            "{{ __('messages.no_keep') }}",
             function okCallback() {
-                // Redirect to the cancel endpoint
                 window.location.href = '{{ url($path) }}';
             },
             function cancelCallback() {
-                Notiflix.Notify.info('Your appointment has not been cancelled.');
+                Notiflix.Notify.info("{{ __('messages.appointment_not_cancelled') }}");
             }
         );
     }
@@ -92,7 +92,7 @@
             const timeDifference = appointmentDate - now;
 
             if (timeDifference <= 0) {
-                document.getElementById("countdown").innerHTML = "The appointment time has arrived!";
+                document.getElementById("countdown").innerHTML = "{{ __('messages.appointment_time_arrived') }}";
                 clearInterval(interval);
                 return;
             }

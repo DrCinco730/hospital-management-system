@@ -37,10 +37,17 @@ Route::get('/dispense_medications', function () {
     return view('dispense_medications'); // Show dispense medications page
 })->name('dispense_medications');
 
+Route::get('/change-language/{lang}', function ($lang) {
+    if (in_array($lang, ['en', 'ar'])) { // Validate supported languages
+        session(['locale' => $lang]);   // Store language in session
+    }
+    return redirect()->back();         // Redirect to the previous page
+})->name('change-language');
 
 
+Route::get("/ZPI",fn()=>view("AR.home"));
 // Group of routes that require authentication
-Route::middleware('auth')->group(function () {
+Route::middleware('language')->group(function () {
 
     Route::get('/home', fn () => view('home'))->name('home'); // Name the route for easier referencing
     Route::post("/bookslot",[AppointmentController::class,'bookSlot'])->name('book.slot');

@@ -1,11 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Select Clinic</title>
-    <link rel="stylesheet" href="{{ asset('css/clinic-style.css') }}">
+    <title>{{ __('messages.select_clinic') }}</title>
+
+    <!-- اختيار ملف CSS بناءً على اللغة -->
+    @if(app()->getLocale() === 'ar')
+        <link rel="stylesheet" href="{{ asset('css/clinic-style-ar.css') }}">
+    @else
+        <link rel="stylesheet" href="{{ asset('css/clinic-style.css') }}">
+    @endif
+
     <style>
         body {
             background-image: url("{{ asset('images/backgrond.webp') }}");
@@ -17,11 +24,11 @@
     </style>
 </head>
 
-<body>
+<body style="direction: {{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }};">
 <div class="wrapper">
     <div class="main_box">
         <div class="main-header">
-            <span>Select Clinic</span>
+            <span>{{ __('messages.select_clinic') }}</span>
         </div>
         <div class="buttons-container">
             @foreach ($clinics as $clinic)
@@ -30,17 +37,16 @@
                     <div class="card-content">
                         <h2>{{ $clinic->name }}</h2>
                         <p class="clinic-location">
-                            <span>City: {{ $clinic->city->name }}</span> &#x2192;
-                            <span>District: {{ $clinic->district->name }}</span>
+                            <span>{{ __('messages.city') }}: {{ $clinic->city->name }}</span> &#x2192;
+                            <span>{{ __('messages.district') }}: {{ $clinic->district->name }}</span>
                         </p>
-                        <button class="button">Book Now</button>
+                        <button class="button">{{ __('messages.book_now') }}</button>
                     </div>
                 </div>
             @endforeach
         </div>
     </div>
 </div>
-
 </body>
 
 </html>

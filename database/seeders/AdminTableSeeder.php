@@ -19,7 +19,7 @@ class AdminTableSeeder extends Seeder
             'name' => 'Super Admin',
             'username' => 'superadmin',
             'email' => 'admin@example.com',
-            'password' => 'password', // The model will automatically hash this
+            'password' => '12345678', // The model will automatically hash this
         ]);
     }
 }

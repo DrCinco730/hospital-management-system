@@ -1,13 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book an Appointment</title>
+    <title>{{ __('messages.book_appointment') }}</title>
+
+    <!-- خطوط وأيقونات -->
     <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Poppins&display=swap'>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/notiflix@3/dist/notiflix-aio-3.2.5.min.js"></script>
-    <link rel="stylesheet" href="{{ asset('css/style_appointment.css') }}">
+
+    <!-- اختيار ملف CSS بناءً على اللغة -->
+    @if(app()->getLocale() === 'ar')
+        <link rel="stylesheet" href="{{ asset('css/style_appointment_ar.css') }}">
+    @else
+        <link rel="stylesheet" href="{{ asset('css/style_appointment.css') }}">
+    @endif
+
     <style>
         body {
             background-image: url("{{ asset('images/backgrond.webp') }}");
@@ -18,93 +28,99 @@
         }
     </style>
 </head>
-<body>
-<x-user-dropdown-menu/>
-<x-popup-message/>
 
+<body style="direction: {{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }};">
+<x-user-dropdown-menu />
+<x-popup-message />
 
+<!-- زر الرجوع للصفحة الرئيسية -->
 <button class="return-button" onclick="goToHome()">
     <i class="fas fa-home"></i>
 </button>
 
 <div class="wrapper">
     <div class="main_box">
+        <!-- عنوان الصفحة -->
         <div class="main-header">
-            <span>Book an Appointment</span>
+            <span>{{ __('messages.book_appointment') }}</span>
         </div>
 
+        <!-- النص الترحيبي -->
         <div class="welcome-text">
-            <p>Select your primary symptom from the dropdown. You can add more symptoms using the checkboxes below.</p>
+            <p>{{ __('messages.select_primary_symptom') }}</p>
         </div>
 
+        <!-- نموذج الحجز -->
         <form id="appointment-form" method="POST" action="{{ route('appointment.store') }}" onsubmit="prepareSymptoms();">
             @csrf
 
+            <!-- اختيار العرض الأساسي -->
             <div class="dropdown-container">
-                <label for="primary-symptom">Primary Symptom:</label>
-                <select id="primary-symptom" name="primary_symptom" class="dropdown" onchange="updateCheckboxes(); updateSeverity();">
-                    <option value="" disabled selected>Select Symptom</option>
+                <label for="primary-symptom">{{ __('messages.primary_symptom') }}:</label>
+                <select id="primary-symptom" name="primary_symptom" class="dropdown" onchange="updateSeverity();">
+                    <option value="" disabled selected>{{ __('messages.select_symptom') }}</option>
                     @foreach($symptoms as $symptom)
-                        @if($symptom->is_emergency == 1)
-                            <option value="{{ $symptom->name }}" data-type="urgent">
-                                {{ $symptom->name }}
-                            </option>
-                        @else
-                            <option value="{{ $symptom->name }}" data-type="normal">
-                                {{ $symptom->name }}
-                            </option>
-                        @endif
+                        <option value="{{ $symptom->name }}" data-type="{{ $symptom->is_emergency ? 'urgent' : 'normal' }}">
+                            {{ $symptom->name }}
+                        </option>
                     @endforeach
                 </select>
             </div>
 
+            <!-- خانات اختيار الأعراض الإضافية -->
             <div id="checkbox-container" class="checkbox-container" style="display: none;">
-                <h3>Additional Symptoms:</h3>
+                <h3>{{ __('messages.additional_symptoms') }}:</h3>
                 @foreach($symptoms as $symptom)
                     <div class="checkbox">
                         <input type="checkbox" id="{{ $symptom->name }}" name="additional_symptoms[]"
                                value="{{ $symptom->name }}"
-                               data-type="{{ $symptom->is_emergency == 1 ? 'urgent' : 'normal' }}"
+                               data-type="{{ $symptom->is_emergency ? 'urgent' : 'normal' }}"
                                onchange="updateSeverity()">
                         <label for="{{ $symptom->name }}">{{ $symptom->name }}</label>
                     </div>
                 @endforeach
-
             </div>
 
+            <!-- زر عرض المزيد -->
             <div class="buttons-container">
-                <button type="button" class="button" id="addMoreSymptomsButton" onclick="showCheckboxes()">Add More Symptoms</button>
+                <button type="button" class="button" id="showMoreButton" onclick="showCheckboxes()">
+                    {{ __('messages.add_more_symptoms') }}
+                </button>
             </div>
 
             <input type="hidden" id="symptoms-list" name="symptoms_list">
 
+            <!-- زر الإرسال -->
             <div class="buttons-container">
-                <button class="button default" id="submitButton" type="submit">Submit</button>
+                <button class="button default" id="submitButton" type="submit">{{ __('messages.submit') }}</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-    // Show additional symptoms checkboxes
+    // النصوص الديناميكية
+    const messages = {
+        highSeverity: "{{ __('messages.high_severity') }}",
+        mediumSeverity: "{{ __('messages.medium_severity') }}",
+        lowSeverity: "{{ __('messages.low_severity') }}",
+        submit: "{{ __('messages.submit') }}",
+    };
+
+    // وظيفة عرض خانات الاختيار
     function showCheckboxes() {
-        document.getElementById("checkbox-container").style.display = "block";
-        document.getElementById("addMoreSymptomsButton").style.display = "none";
+        const checkboxContainer = document.getElementById("checkbox-container");
+        const addMoreButton = document.getElementById("showMoreButton");
+
+        if (checkboxContainer) {
+            checkboxContainer.style.display = "block"; // عرض خانات الاختيار
+            if (addMoreButton) {
+                addMoreButton.style.display = "none"; // إخفاء زر عرض المزيد
+            }
+        }
     }
 
-    // Update checkbox visibility based on selected primary symptom
-    function updateCheckboxes() {
-        const selectedSymptom = document.getElementById("primary-symptom").value;
-        const checkboxes = document.querySelectorAll("#checkbox-container .checkbox input");
-
-        checkboxes.forEach(checkbox => {
-            checkbox.parentElement.style.display = checkbox.value === selectedSymptom ? 'none' : 'block';
-        });
-
-        updateSeverity(); // Call updateSeverity to adjust button state
-    }
-
-    // Update severity and submit button state
+    // تحديث حالة الزر بناءً على الأعراض
     function updateSeverity() {
         const submitButton = document.getElementById("submitButton");
         const primaryOption = document.getElementById("primary-symptom").selectedOptions[0];
@@ -114,14 +130,14 @@
         let normalCount = 0;
         let urgentCount = 0;
 
-        // Check the type of the primary symptom
+        // تحقق من نوع العرض الأساسي
         if (selectedTypePrimary === 'normal') {
             normalCount += 1;
         } else if (selectedTypePrimary === 'urgent') {
             urgentCount += 1;
         }
 
-        // Check the types of additional symptoms
+        // تحقق من الأعراض الإضافية
         additionalCheckboxes.forEach(checkbox => {
             const type = checkbox.getAttribute('data-type');
             if (type === 'normal') {
@@ -131,30 +147,26 @@
             }
         });
 
-        // Remove all previous severity classes
+        // إزالة كل الفئات السابقة
         submitButton.classList.remove('green', 'yellow', 'red', 'default');
 
-        // Determine severity based on counts
+        // تحديد اللون بناءً على عدد الأعراض
         if (urgentCount >= 1) {
-            // High Severity if at least one urgent symptom is selected
             submitButton.classList.add('red');
-            submitButton.textContent = 'High Severity';
+            submitButton.textContent = messages.highSeverity; // شدة عالية
         } else if (normalCount === 1) {
-            // Low Severity if exactly one normal symptom is selected
             submitButton.classList.add('green');
-            submitButton.textContent = 'Low Severity';
+            submitButton.textContent = messages.lowSeverity; // شدة منخفضة
         } else if (normalCount >= 2) {
-            // Medium Severity if two or more normal symptoms are selected
             submitButton.classList.add('yellow');
-            submitButton.textContent = 'Medium Severity';
+            submitButton.textContent = messages.mediumSeverity; // شدة متوسطة
         } else {
-            // Default state if no symptoms are selected
             submitButton.classList.add('default');
-            submitButton.textContent = 'Submit';
+            submitButton.textContent = messages.submit; // الحالة الافتراضية
         }
     }
 
-    // Prepare the symptoms list for submission
+    // إعداد الأعراض قبل الإرسال
     function prepareSymptoms() {
         const selectedSymptom = document.getElementById("primary-symptom").value;
         const checkboxes = document.querySelectorAll("#checkbox-container .checkbox input:checked");
@@ -166,15 +178,16 @@
         document.getElementById("symptoms-list").value = JSON.stringify(symptoms);
     }
 
-    // Navigate to home page
+    // الانتقال إلى الصفحة الرئيسية
     function goToHome() {
         window.location.href = "/home";
     }
 
-    // Initial call to set the button state on page load
+    // تحديث الحالة عند تحميل الصفحة
     document.addEventListener('DOMContentLoaded', function () {
         updateSeverity();
     });
 </script>
 </body>
+
 </html>
